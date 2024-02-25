@@ -21,6 +21,10 @@ def get_dependents_info(url: str) -> list:
     # identify there is menu list or not
     menu_list = soup.find_all('a', class_='select-menu-item')
 
+    total_number = 0    # total used by project number
+    total_star = 0      # total used by project star number
+    total_fork = 0      # total used by project fork number
+
     for m_list in menu_list:
         href = m_list['href']
 
