@@ -39,13 +39,21 @@ def get_dependents_info(url: str) -> list:
             for t in soup.findAll("div", {"class": "Box-row"})
         ]
 
-        print(page_data)
-        print(len(page_data))
-        paginationContainer = soup.find("div", {"class":"paginate-container"}).find('a')
-        if paginationContainer:
-            url = paginationContainer["href"]
-        else:
-            return
+        total_number += len(page_data)
+
+        span_tags = soup.find_all('span', class_='color-fg-muted text-bold pl-3')
+
+        for span_tag in span_tags:
+            svg_star_tag = span_tag.find('svg', class_='octicon octicon-star')
+            svg_fork_tag = span_tag.find('svg', class_='octicon octicon-repo-forked')
+            if svg_star_tag:
+                total_star += int(span_tag.text.strip().replace(',', ''))
+            if svg_fork_tag:
+                total_fork += int(span_tag.text.strip().replace(',', ''))
+
+    print(f"total_number is {total_number}")
+    print(f"total_star is {total_star}")
+    print(f"total_fork is {total_fork}")
 
 
 def main():
