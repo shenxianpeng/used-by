@@ -20,7 +20,7 @@ Generate Used By badge from GitHub dependents information.
 
 options:
   -h, --help           show this help message and exit
-  --repo REPO          GitHub repository name. e.g. cpp-linter/cpp-linter-action
+  --repo REPO          GitHub repository name. e.g. shenxianpeng/used-by
   --doc-type DOC_TYPE  Supports md(Markdown) and rst(reStructuredText). Defaults to `md`.
 ```
 
@@ -28,16 +28,10 @@ options:
 
 ```bash
 # generate markdown makeup text by default
-$ used-by --repo cpp-linter/cpp-linter-action
-<!--used-by-badge-start-->
-[![](https://img.shields.io/static/v1?label=Used%20by&message=516&color=informational&logo=slickpic)](https://github.com/cpp-linter/cpp-linter-action/network/dependents)
-<!--used-by-badge-end-->
+$ used-by --repo shenxianpeng/used-by
 
 # generate reStructuredText makeup text
-used-by --repo cpp-linter/cpp-linter-action --doc-type rst
-.. image:: https://img.shields.io/static/v1?label=Used%20by&message=516&color=informational&logo=slickpic
-    :target: https://github.com/cpp-linter/cpp-linter-action/network/dependents
-    :alt: used-by
+used-by --repo shenxianpeng/used-by --doc-type rst
 ```
 
 ## Add Used By badge in README
@@ -46,23 +40,21 @@ Copy following markdown content to show Used By badge in your repository README.
 
 You can add Used By badge to your repository README to show your users and contributors.
 
-<!--used-by-badge-start-->
-[![](https://img.shields.io/static/v1?label=Used%20by&message=516&color=informational&logo=slickpic)](https://github.com/cpp-linter/cpp-linter-action/network/dependents)
-<!--used-by-badge-end-->
+<!-- used by action -->
+[![](https://img.shields.io/static/v1?label=Used%20by&message=517&color=informational&logo=slickpic)](https://github.com/cpp-linter/cpp-linter-action/network/dependents)
+<!-- used by action -->
 
 **Markdown**
 
 ```
-<!--used-by-badge-start-->
-[![](https://img.shields.io/static/v1?label=Used%20by&message=516&color=informational&logo=slickpic)](https://github.com/cpp-linter/cpp-linter-action/network/dependents)
-<!--used-by-badge-end-->
+[![](https://img.shields.io/static/v1?label=Used%20by&message=517&color=informational&logo=slickpic)](https://github.com/cpp-linter/cpp-linter-action/network/dependents)
 ```
 
 **reStructuredText**
 
 ```
 .. image:: https://img.shields.io/static/v1?label=Used%20by&message=516&color=informational&logo=slickpic
-    :target: https://github.com/cpp-linter/cpp-linter-action/network/dependents
+    :target: https://github.com/shenxianpeng/used-by/network/dependents
     :alt: used-by
 ```
 
