@@ -68,4 +68,4 @@ You can add Used By badge to your repository README to show your users and contr
 
 ## License
 
-MIT
+[MIT](LICENSE) © 2024-present Xianpeng Shen
