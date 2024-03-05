@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: shenxianpeng/used-by@v2
+      - uses: shenxianpeng/used-by@main
         id: usedby
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
