@@ -28,17 +28,11 @@ inputs:
     description: The badge display color. Defaults to `slickpic`.
     required: false
     default: "slickpic"
+  update-badge:
+    description: The badge display color. Defaults to `false`.
+    required: false
+    default: "false"
 
-outputs:
-  checks-failed:
-    description: An integer that can be used as a boolean value to indicate if any checks failed by clang-tidy and clang-format.
-    value: ${{ steps.cpp-linter-unix.outputs.checks-failed || steps.cpp-linter-windows.outputs.checks-failed }}
-  clang-tidy-checks-failed:
-    description: An integer that can be used as a boolean value to indicate if any checks failed by clang-tidy only.
-    value: ${{ steps.cpp-linter-unix.outputs.clang-tidy-checks-failed || steps.cpp-linter-windows.outputs.clang-tidy-checks-failed }}
-  clang-format-checks-failed:
-    description: An integer that can be used as a boolean value to indicate if any checks failed by clang-format only.
-    value: ${{ steps.cpp-linter-unix.outputs.clang-format-checks-failed || steps.cpp-linter-windows.outputs.clang-format-checks-failed }}
 runs:
   using: "composite"
   steps:
@@ -50,89 +44,25 @@ runs:
         python-version: '3.10'
         update-environment: false
 
-    - name: Install Linux clang dependencies
-      if: runner.os == 'Linux'
-      shell: bash
-      run: |
-        sudo apt-get update
-        # First try installing from default Ubuntu repositories before trying LLVM script
-        if ! sudo apt-get install -y clang-format-${{ inputs.version }} clang-tidy-${{ inputs.version }}; then
-          # This LLVM script will add the relevant LLVM PPA: https://apt.llvm.org/
-          wget https://apt.llvm.org/llvm.sh -O $GITHUB_ACTION_PATH/llvm_install.sh
-          chmod +x $GITHUB_ACTION_PATH/llvm_install.sh
-          if sudo $GITHUB_ACTION_PATH/llvm_install.sh ${{ inputs.version }}; then
-            sudo apt-get install -y clang-format-${{ inputs.version }} clang-tidy-${{ inputs.version }}
-          fi
-        fi
-
     - name: Setup python venv (Unix)
       if: runner.os == 'Linux' || runner.os == 'macOS'
       shell: bash
       run: |
         ${{ steps.setup-python.outputs.python-path }} -m venv "$GITHUB_ACTION_PATH/venv"
         source "$GITHUB_ACTION_PATH/venv/bin/activate"
-        pip install -r "$GITHUB_ACTION_PATH/requirements.txt"
-        clang-tools -i ${{ inputs.version }} -b
+        pip install used-by
 
-    - name: Run cpp-linter (Unix)
-      id: cpp-linter-unix
+    - name: Run used-by (Unix)
+      id: used-by-unix
       if: runner.os == 'Linux' || runner.os == 'macOS'
       shell: bash
       run: |
         source "$GITHUB_ACTION_PATH/venv/bin/activate"
 
-        cpp-linter \
-         --style="${{ inputs.style }}" \
-         --extensions=${{ inputs.extensions }} \
-         --tidy-checks="${{ inputs.tidy-checks }}" \
-         --repo-root=${{ inputs.repo-root }} \
-         --version=${{ inputs.version }} \
-         --verbosity=${{ inputs.verbosity }} \
-         --lines-changed-only=${{ inputs.lines-changed-only }} \
-         --files-changed-only=${{ inputs.files-changed-only }} \
-         --thread-comments=${{ inputs.thread-comments }} \
-         --no-lgtm=${{ inputs.no-lgtm }} \
-         --step-summary=${{ inputs.step-summary }} \
-         --ignore="${{ inputs.ignore }}" \
-         --database=${{ inputs.database }} \
-         --file-annotations=${{ inputs.file-annotations }} \
-         --extra-arg="${{ inputs.extra-args }}" \
-         --tidy-review="${{ inputs.tidy-review }}" \
-         --format-review="${{ inputs.format-review }}"
-
-    - name: Setup python venv (Windows)
-      if: runner.os == 'Windows'
-      shell: pwsh
-      run: |
-        ${{ steps.setup-python.outputs.python-path }} -m venv "$env:GITHUB_ACTION_PATH/venv"
-        Invoke-Expression -Command "$env:GITHUB_ACTION_PATH/venv/Scripts/Activate.ps1"
-        pip install -r "$env:GITHUB_ACTION_PATH/requirements.txt"
-        clang-tools -i ${{ inputs.version }} -b
-
-    - name: Run cpp-linter (Windows)
-      id: cpp-linter-windows
-      if: runner.os == 'Windows'
-      shell: pwsh
-      run: |
-        Invoke-Expression -Command "$env:GITHUB_ACTION_PATH/venv/Scripts/Activate.ps1"
-
-        $app = 'cpp-linter' +
-        ' --style="${{ inputs.style }}"' +
-        ' --extensions=${{ inputs.extensions }}' +
-        ' --tidy-checks="${{ inputs.tidy-checks }}"' +
-        ' --repo-root=${{ inputs.repo-root }}' +
-        ' --version=${{ inputs.version }}' +
-        ' --verbosity=${{ inputs.verbosity }}' +
-        ' --lines-changed-only=${{ inputs.lines-changed-only }}' +
-        ' --files-changed-only=${{ inputs.files-changed-only }}' +
-        ' --thread-comments=${{ inputs.thread-comments }}' +
-        ' --no-lgtm=${{ inputs.no-lgtm }}' +
-        ' --step-summary=${{ inputs.step-summary }}' +
-        ' --ignore="${{ inputs.ignore }}"' +
-        ' --database=${{ inputs.database }}' +
-        ' --file-annotations=${{ inputs.file-annotations }}' +
-        ' --extra-arg="${{ inputs.extra-args }}"' +
-        ' --tidy-review="${{ inputs.tidy-review }}"' +
-        ' --format-review="${{ inputs.format-review }}"'
-
-        Invoke-Expression -Command $app
+        used-by \
+         --repo="${{ inputs.repo }}" \
+         --file-path="${{ inputs.file-path }}"" \
+         --badge-label="${{ inputs.badge-label }}" \
+         --badge-color="${{ inputs.badge-color }}"" \
+         --badge-logo="${{ inputs.badge-logo }}"" \
+         --update-badge=${{ inputs.update-badge }}

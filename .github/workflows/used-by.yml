@@ -1,0 +1,20 @@
+name: Used By
+
+on:
+  schedule:
+    # https://crontab.guru/
+    - cron: '0 8 * * *' # At 08:00
+  workflow_dispatch:
+
+jobs:
+  used-by:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shenxianpeng/used-by@v2
+        id: usedby
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          repo: '${{ github.repository }}' # current repository
+          update-badge: 'true'

@@ -49,7 +49,6 @@ def get_parser():
     parser.add_argument(
         "--update-badge",
         default=False,
-        action="store_const",
         help="Add or update badge if it is True. Defaults to `False`.",
     )
 
@@ -122,9 +121,9 @@ def update_existing_badge(file_path, existing_badge, new_badge) -> None:
     print("updated existing badge.")
 
 
-def add_new_badge(file_path, new_badge) -> None:
-    with open(file_path, "w") as file:
-        file.write(COMMENT_MARKER + "\n" + new_badge + "\n" + COMMENT_MARKER)
+# FIXME: add thread comments to pull request.
+def post_thread_badge(new_badge) -> None:
+    print(COMMENT_MARKER + "\n" + new_badge + "\n" + COMMENT_MARKER)
 
 
 def main():
@@ -157,7 +156,7 @@ def main():
     if update_badge:
         update_existing_badge(file_path, existing_badge, new_badge)
     if existing_badge == "":
-        add_new_badge(file_path, new_badge)
+        post_thread_badge(new_badge)
 
 
 if __name__ == "__main__":

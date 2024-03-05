@@ -1,8 +1,31 @@
 # Used By
 
+[![Build](https://github.com/shenxianpeng/used-by/actions/workflows/build.yml/badge.svg)](https://github.com/shenxianpeng/used-by/actions/workflows/build.yml)
+[![pre-commit](https://github.com/shenxianpeng/used-by/actions/workflows/pre-commit.yml/badge.svg)](https://github.com/shenxianpeng/used-by/actions/workflows/pre-commit.yml)
+
 Generate Used By badge from GitHub dependents information.
 
+> [!WARNING]
+> We only support Linux runners using a Debian based Linux OS (like Ubuntu and many others) and MacOS.
+
 ## Usage
+
+### Run as GitHub Action
+
+Create a new GitHub Actions workflow in your project, e.g. at .github/workflows/used-by.yml
+
+
+```yaml
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shenxianpeng/used-by@v2
+        id: usedby
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          repo: '${{ github.repository }}' # current repository
+          update-badge: 'true'
+```
 
 ### Install `used-by` CLI
 
