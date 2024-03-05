@@ -50,7 +50,7 @@ runs:
       run: |
         ${{ steps.setup-python.outputs.python-path }} -m venv "$GITHUB_ACTION_PATH/venv"
         source "$GITHUB_ACTION_PATH/venv/bin/activate"
-        pip install used-by
+        pip install -e .
 
     - name: Run used-by (Unix)
       id: used-by-unix
