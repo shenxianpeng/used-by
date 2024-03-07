@@ -35,7 +35,10 @@ runs:
   steps:
     - name: Install used-by
       shell: bash
-      run: pip install git+https://github.com/shenxianpeng/used-by.git@main
+      run: |
+        # try to fix https://github.com/pypa/setuptools/issues/3269
+        python3 -m pip install pip -U
+        pip install git+https://github.com/shenxianpeng/used-by.git@main
 
     - name: Run used-by
       id: used-by
