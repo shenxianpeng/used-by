@@ -46,8 +46,8 @@ runs:
       run: |
         used-by \
          --repo="${{ inputs.repo }}" \
-         --file-path="${{ inputs.file-path }}"" \
+         --file-path="${{ inputs.file-path }}" \
          --badge-label="${{ inputs.badge-label }}" \
-         --badge-color="${{ inputs.badge-color }}"" \
-         --badge-logo="${{ inputs.badge-logo }}"" \
+         --badge-color="${{ inputs.badge-color }}" \
+         --badge-logo="${{ inputs.badge-logo }}" \
          --update-badge=${{ inputs.update-badge }}
