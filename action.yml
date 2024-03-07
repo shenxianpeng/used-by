@@ -44,21 +44,14 @@ runs:
         python-version: '3.10'
         update-environment: false
 
-    - name: Setup python venv (Unix)
-      if: runner.os == 'Linux' || runner.os == 'macOS'
+    - name: Checkout
+      uses: actions/checkout@v4
+      run: pip install -e .
+
+    - name: Run used-by
+      id: used-by
       shell: bash
       run: |
-        ${{ steps.setup-python.outputs.python-path }} -m venv "$GITHUB_ACTION_PATH/venv"
-        source "$GITHUB_ACTION_PATH/venv/bin/activate"
-        pip install -e .
-
-    - name: Run used-by (Unix)
-      id: used-by-unix
-      if: runner.os == 'Linux' || runner.os == 'macOS'
-      shell: bash
-      run: |
-        source "$GITHUB_ACTION_PATH/venv/bin/activate"
-
         used-by \
          --repo="${{ inputs.repo }}" \
          --file-path="${{ inputs.file-path }}"" \
