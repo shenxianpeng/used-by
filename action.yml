@@ -44,10 +44,9 @@ runs:
         python-version: '3.10'
         update-environment: false
 
-    - name: Checkout
-      uses: actions/checkout@v4
+    - name: Install used-by
       shell: bash
-      run: pip install -e .
+      run: pip install git+https://github.com/shenxianpeng/used-by.git@main
 
     - name: Run used-by
       id: used-by
