@@ -12,7 +12,7 @@ inputs:
   file-path:
     description: The path to file. Defaults to `README.md`.
     required: false
-    default: 'md'
+    default: 'README.md'
   badge-label:
     description: The badge display name. Defaults to `Used by`.
     required: false
