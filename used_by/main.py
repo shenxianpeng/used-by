@@ -23,12 +23,6 @@ def get_parser():
     )
 
     parser.add_argument(
-        "--file-type",
-        default="md",
-        help="The file type supports md(Markdown) and rst(reStructuredText). Defaults to `md`.",
-    )
-
-    parser.add_argument(
         "--badge-label",
         default="Used by",
         help="The badge display name. Defaults to `Used by`.",

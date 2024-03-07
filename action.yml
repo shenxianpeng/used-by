@@ -6,18 +6,15 @@ branding:
   color: "green"
 inputs:
   repo:
-    description: >-
-      GitHub repository name. e.g. shenxianpeng/used-by. Defaults to shenxianpeng/used-by.
+    description: GitHub repository name. e.g. shenxianpeng/used-by. Defaults to shenxianpeng/used-by.
     required: true
     default: 'shenxianpeng/used-by'
-  doc-type:
-    description: >-
-      Supports md(Markdown) and rst(reStructuredText). Defaults to `md`.
+  file-path:
+    description: The path to file. Defaults to `README.md`.
     required: false
     default: 'md'
   badge-label:
-    description: >
-      The badge display name. Defaults to `Used by`.
+    description: The badge display name. Defaults to `Used by`.
     required: false
     default: 'Used by'
   badge-color:
