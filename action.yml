@@ -46,6 +46,7 @@ runs:
 
     - name: Checkout
       uses: actions/checkout@v4
+      shell: bash
       run: pip install -e .
 
     - name: Run used-by
