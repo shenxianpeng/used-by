@@ -3,6 +3,7 @@ import requests
 import re
 from urllib.parse import quote
 from bs4 import BeautifulSoup
+from pathlib import Path
 from used_by import COMMENT_MARKER
 
 
@@ -124,8 +125,8 @@ def main():
     parser = get_parser()
     args = parser.parse_args()
     repo_name = args.repo
-    file_type = args.file_type.lower()
     file_path = args.file_path
+    file_type = Path(file_path).suffix[1:].lower()  # Remove the dot from the extension
     badge_label = args.badge_label
     badge_color = args.badge_color
     badge_logo = args.badge_logo
