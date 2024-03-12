@@ -1,6 +1,7 @@
 # Used By
-
+<!-- used by action -->
 [![used-by](https://img.shields.io/static/v1?label=Used%20by&message=0&color=informational&logo=slickpic)](https://github.com/shenxianpeng/used-by/network/dependents)
+<!-- used by action -->
 [![Build](https://github.com/shenxianpeng/used-by/actions/workflows/build.yml/badge.svg)](https://github.com/shenxianpeng/used-by/actions/workflows/build.yml)
 [![pre-commit](https://github.com/shenxianpeng/used-by/actions/workflows/pre-commit.yml/badge.svg)](https://github.com/shenxianpeng/used-by/actions/workflows/pre-commit.yml)
 
@@ -13,8 +14,7 @@ Generate Used By badge from GitHub dependents information.
 
 ### Run as GitHub Action
 
-Create a new GitHub Actions workflow in your project, e.g. at .github/workflows/used-by.yml
-
+Create a new GitHub Actions workflow in your project, e.g. at [.github/workflows/used-by.yml](.github/workflows/used-by.yml)
 
 ```yaml
     steps:
@@ -73,18 +73,15 @@ used-by --repo shenxianpeng/used-by --doc-type rst
 
 ## Add Used By badge in README
 
-Copy following markdown content to show Used By badge in your repository README.
-
-You can add Used By badge to your repository README to show your users and contributors.
-
-<!-- used by action -->
+Copy following content to show Used By badge in your repository README.
 [![used-by](https://img.shields.io/static/v1?label=Used%20by&message=0&color=informational&logo=slickpic)](https://github.com/shenxianpeng/used-by/network/dependents)
-<!-- used by action -->
 
 **Markdown**
 
 ```
+<!-- used by action -->
 [![used-by](https://img.shields.io/static/v1?label=Used%20by&message=0&color=informational&logo=slickpic)](https://github.com/shenxianpeng/used-by/network/dependents)
+<!-- used by action -->
 ```
 
 **reStructuredText**

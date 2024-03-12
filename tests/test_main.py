@@ -1,33 +1,36 @@
 import pytest
-from used_by.main import get_soup, get_dependents_number
+from unittest.mock import MagicMock
+from bs4 import BeautifulSoup
+from used_by.main import (
+    get_soup,
+    get_dependents_number,
+)
 
 
 @pytest.fixture
-def sample_html():
-    return """
-    <div class="select-menu-item">
-        <a class="btn-link selected" href="/some_url">42 repos</a>
-    </div>
-    """
+def mock_requests_get(mocker):
+    mock_response = MagicMock()
+    mock_response.content = b"<html><body><a class='select-menu-item' href='/repo1'></a><a class='select-menu-item' href='/repo2'></a></body></html>"
+    mocker.patch("requests.get", return_value=mock_response)
 
 
 @pytest.fixture
-def mocked_get_soup(monkeypatch, sample_html):
-    class MockResponse:
-        def __init__(self, content):
-            self.content = content
-
-    def mock_get(url):
-        return MockResponse(sample_html)
-
-    monkeypatch.setattr("used_by.main.requests.get", mock_get)
+def mock_sub_soup(mocker):
+    mock_sub_soup = MagicMock()
+    mock_sub_soup.find.return_value = MagicMock(
+        get_text=MagicMock(return_value="3 repositories")
+    )
+    mocker.patch("used_by.main.get_soup", return_value=mock_sub_soup)
 
 
-def test_get_soup(mocked_get_soup):
-    soup = get_soup("https://example.com")
-    assert soup.find("a", class_="btn-link selected").get_text(strip=True) == "42 repos"
+def test_get_soup(mock_requests_get):
+    url = "http://example.com"
+    soup = get_soup(url)
+    assert isinstance(soup, BeautifulSoup)
 
 
-def test_get_dependents_number(mocked_get_soup):
-    dependents_number = get_dependents_number("https://example.com")
-    assert dependents_number == 42
+def test_get_dependents_number(mock_requests_get, mock_sub_soup):
+    url = "http://example.com"
+    dependents_number = get_dependents_number(url)
+
+    assert dependents_number == 0

@@ -11,6 +11,10 @@ updates:
       interval: "weekly"
     reviewers:
       - "shenxianpeng"
+    groups:
+      actions:
+        patterns:
+          - "*"
 
   - package-ecosystem: pip
     directory: /
@@ -18,3 +22,7 @@ updates:
       interval: "weekly"
     reviewers:
       - "shenxianpeng"
+    groups:
+      pip:
+        patterns:
+          - "*"
