@@ -1,0 +1,22 @@
+# This workflow will install Python dependencies, run tests and lint with a single version of Python
+# For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
+
+name: main
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+    paths:
+      - "**.py"
+      - "**requirements*.txt"
+      - pyproject.toml
+      - .pre-commit-config.yaml
+      - ".github/workflows/main.yml"
+      - "!docs/**"
+  workflow_dispatch:
+
+jobs:
+  publish:
+    uses: shenxianpeng/.github/.github/workflows/py-publish.yml@main
