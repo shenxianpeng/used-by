@@ -25,6 +25,16 @@ Create a new GitHub Actions workflow in your project, e.g. at .github/workflows/
         with:
           repo: '${{ github.repository }}' # current repository
           update-badge: 'true'
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v6
+        with:
+          add-paths: "README.md" # the file path to commit
+          commit-message: "chore: update used-by number"
+          title: "chore(README.md): automatically update used-by number"
+          base: main
+          labels: documentation
+          delete-branch: true
 ```
 
 ### Install `used-by` CLI
