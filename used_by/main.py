@@ -81,7 +81,7 @@ def gen_badge_content(
     logo="slickpic",
 ) -> str:
     if "md" in file_type:
-        badge_content = f"[![](https://img.shields.io/static/v1?label={quote(label)}&message={deps_number}&color={color}&logo={logo})](https://github.com/{repo_name}/network/dependents)"
+        badge_content = f"[![used-by](https://img.shields.io/static/v1?label={quote(label)}&message={deps_number}&color={color}&logo={logo})](https://github.com/{repo_name}/network/dependents)"
     elif "rst" in file_type:
         badge_content = f"""
 .. image:: https://img.shields.io/static/v1?label={quote(label)}&message={deps_number}&color={color}&logo={logo}

@@ -1,5 +1,6 @@
 # Used By
 
+[![used-by](https://img.shields.io/static/v1?label=Used%20by&message=0&color=informational&logo=slickpic)](https://github.com/shenxianpeng/used-by/network/dependents)
 [![Build](https://github.com/shenxianpeng/used-by/actions/workflows/build.yml/badge.svg)](https://github.com/shenxianpeng/used-by/actions/workflows/build.yml)
 [![pre-commit](https://github.com/shenxianpeng/used-by/actions/workflows/pre-commit.yml/badge.svg)](https://github.com/shenxianpeng/used-by/actions/workflows/pre-commit.yml)
 
@@ -36,6 +37,9 @@ Create a new GitHub Actions workflow in your project, e.g. at .github/workflows/
           labels: documentation
           delete-branch: true
 ```
+
+> [!IMPORTANT]
+> To create pull request with `peter-evans/create-pull-request@v6` requires changing [Workflow permissions](https://github.com/peter-evans/create-pull-request?tab=readme-ov-file#workflow-permissions) to **Read and write permissions** and enabling  **Allow GitHub Actions to create and approve pull requests**.
 
 ### Install `used-by` CLI
 
@@ -74,19 +78,19 @@ Copy following markdown content to show Used By badge in your repository README.
 You can add Used By badge to your repository README to show your users and contributors.
 
 <!-- used by action -->
-[![](https://img.shields.io/static/v1?label=Used%20by&message=0&color=informational&logo=slickpic)](https://github.com/shenxianpeng/used-by/network/dependents)
+[![used-by](https://img.shields.io/static/v1?label=Used%20by&message=0&color=informational&logo=slickpic)](https://github.com/shenxianpeng/used-by/network/dependents)
 <!-- used by action -->
 
 **Markdown**
 
 ```
-[![](https://img.shields.io/static/v1?label=Used%20by&message=0&color=informational&logo=slickpic)](https://github.com/shenxianpeng/used-by/network/dependents)
+[![used-by](https://img.shields.io/static/v1?label=Used%20by&message=0&color=informational&logo=slickpic)](https://github.com/shenxianpeng/used-by/network/dependents)
 ```
 
 **reStructuredText**
 
 ```
-.. image:: https://img.shields.io/static/v1?label=Used%20by&message=516&color=informational&logo=slickpic
+.. image:: https://img.shields.io/static/v1?label=Used%20by&message=0&color=informational&logo=slickpic
     :target: https://github.com/shenxianpeng/used-by/network/dependents
     :alt: used-by
 ```
