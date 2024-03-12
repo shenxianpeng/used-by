@@ -74,13 +74,13 @@ Copy following markdown content to show Used By badge in your repository README.
 You can add Used By badge to your repository README to show your users and contributors.
 
 <!-- used by action -->
-[![](https://img.shields.io/static/v1?label=Used%20by&message=517&color=informational&logo=slickpic)](https://github.com/cpp-linter/cpp-linter-action/network/dependents)
+[![](https://img.shields.io/static/v1?label=Used%20by&message=0&color=informational&logo=slickpic)](https://github.com/shenxianpeng/used-by/network/dependents)
 <!-- used by action -->
 
 **Markdown**
 
 ```
-[![](https://img.shields.io/static/v1?label=Used%20by&message=517&color=informational&logo=slickpic)](https://github.com/cpp-linter/cpp-linter-action/network/dependents)
+[![](https://img.shields.io/static/v1?label=Used%20by&message=0&color=informational&logo=slickpic)](https://github.com/shenxianpeng/used-by/network/dependents)
 ```
 
 **reStructuredText**
