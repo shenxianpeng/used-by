@@ -103,7 +103,9 @@ def generate_rst_badge(
 def get_existing_badge(file_path) -> str:
     with open(file_path) as file:
         file_contents = file.read()
-        existing_badge = re.search(f"(.*?){COMMENT_MARKER}", file_contents, re.DOTALL)
+        existing_badge = re.search(
+            rf"\s(.*?){COMMENT_MARKER}", file_contents, re.DOTALL
+        )
     return existing_badge.group(1).strip() if existing_badge else ""
 
 

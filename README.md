@@ -74,6 +74,7 @@ used-by --repo shenxianpeng/used-by --doc-type rst
 ## Add Used By badge in README
 
 Copy following content to show Used By badge in your repository README.
+
 [![used-by](https://img.shields.io/static/v1?label=Used%20by&message=0&color=informational&logo=slickpic)](https://github.com/shenxianpeng/used-by/network/dependents) <!-- used by badge -->
 
 **Markdown**
