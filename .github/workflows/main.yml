@@ -53,5 +53,5 @@ jobs:
 
   coverage:
     needs: [build]
-    uses: cpp-linter/.github/.github/workflows/py-coverage.yml@main
+    uses: shenxianpeng/.github/.github/workflows/py-coverage.yml@main
     secrets: inherit

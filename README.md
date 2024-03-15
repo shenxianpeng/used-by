@@ -31,8 +31,8 @@ Create a new GitHub Actions workflow in your project, e.g. at [.github/workflows
         uses: peter-evans/create-pull-request@v6
         with:
           add-paths: "README.md" # the file path to commit
-          commit-message: "chore: update used-by number"
-          title: "chore(README.md): automatically update used-by number"
+          commit-message: "chore: update used-by badge by github-actions[bot]"
+          title: "chore: automatically update used-by badge"
           base: main
           labels: documentation
           delete-branch: true
