@@ -1,1 +1,1 @@
-COMMENT_MARKER = "<!-- used by action -->"
+COMMENT_MARKER = "<!-- used by badge -->"

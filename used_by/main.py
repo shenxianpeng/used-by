@@ -100,25 +100,10 @@ def generate_rst_badge(
     return badge_content
 
 
-# def get_existing_badge(file_path) -> str:
-#     with open(file_path) as file:
-#         file_contents = file.read()
-#         if COMMENT_MARKER not in file_contents:
-#             return ""
-#         pattern = rf"{COMMENT_MARKER}(.*?){COMMENT_MARKER}"
-#         matches = re.findall(pattern, file_contents, re.DOTALL)
-#         if matches:
-#             existing_badge = matches[0].strip()
-
-#     return existing_badge
-
-
 def get_existing_badge(file_path) -> str:
     with open(file_path) as file:
         file_contents = file.read()
-        existing_badge = re.search(
-            f"{COMMENT_MARKER}(.*?){COMMENT_MARKER}", file_contents, re.DOTALL
-        )
+        existing_badge = re.search(f"(.*?){COMMENT_MARKER}", file_contents, re.DOTALL)
     return existing_badge.group(1).strip() if existing_badge else ""
 
 
@@ -134,7 +119,7 @@ def update_existing_badge(file_path, existing_badge, new_badge) -> None:
 # FIXME: add thread comments to pull request.
 def add_new_badge(file_path, new_badge) -> None:
     with open(file_path, "a") as file:
-        file.write(f"\n{COMMENT_MARKER}\n{new_badge}\n{COMMENT_MARKER}")
+        file.write(f"\n{new_badge} {COMMENT_MARKER}")
     print("Added new badge.")
 
 
