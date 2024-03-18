@@ -1,4 +1,4 @@
-name: Used By
+name: Used By Action
 description: Generate Used By badge from GitHub dependents information.
 author: shenxianpeng
 branding:
