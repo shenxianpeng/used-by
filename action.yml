@@ -10,23 +10,23 @@ inputs:
     required: true
     default: 'shenxianpeng/used-by'
   file-path:
-    description: The path to file. Defaults to `README.md`.
+    description: The path to file. Defaults to 'README.md'.
     required: false
     default: 'README.md'
   badge-label:
-    description: The badge display name. Defaults to `Used by`.
+    description: The badge display name. Defaults to 'Used by'.
     required: false
     default: 'Used by'
   badge-color:
-    description: The badge display color. Defaults to `informational`.
+    description: The badge display color. Defaults to 'informational'.
     required: false
     default: 'informational'
   badge-logo:
-    description: The badge display color. Defaults to `slickpic`.
+    description: The badge display color. Defaults to 'slickpic'.
     required: false
     default: "slickpic"
   update-badge:
-    description: The badge display color. Defaults to `false`.
+    description: The badge display color. Defaults to 'false'.
     required: false
     default: "false"
 

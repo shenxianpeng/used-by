@@ -10,7 +10,7 @@ from used_by import COMMENT_MARKER
 def get_parser():
     parser = argparse.ArgumentParser(
         prog="used-by",
-        description="Generate a 'Used By' badge from GitHub dependents information.",
+        description="Generate a Used By badge from GitHub dependents information.",
     )
 
     parser.add_argument(
@@ -20,25 +20,25 @@ def get_parser():
     parser.add_argument(
         "--file-path",
         default="README.md",
-        help="The path to the file where the badge will be added. Defaults to `README.md`.",
+        help="The path to the file where the badge will be added. Defaults to README.md.",
     )
 
     parser.add_argument(
         "--badge-label",
         default="Used by",
-        help="The badge display name. Defaults to 'Used by'.",
+        help="The badge display name. Defaults to Used by.",
     )
 
     parser.add_argument(
         "--badge-color",
         default="informational",
-        help="The badge display color. Defaults to 'informational'.",
+        help="The badge display color. Defaults to informational.",
     )
 
     parser.add_argument(
         "--badge-logo",
         default="slickpic",
-        help="The badge display logo. Defaults to 'slickpic'.",
+        help="The badge display logo. Defaults to slickpic.",
     )
 
     parser.add_argument(
@@ -85,7 +85,6 @@ def generate_markdown_badge(
     badge_logo,
 ) -> str:
     badge_content = f"[![{badge_label}]({generate_badge_url(deps_number, badge_label, badge_color, badge_logo)})](https://github.com/{repo_name}/network/dependents)"
-    print(f"badge_content is {badge_content}")
     return badge_content
 
 
@@ -103,8 +102,9 @@ def generate_rst_badge(
 def get_existing_badge(file_path) -> str:
     with open(file_path) as file:
         file_contents = file.read()
-        existing_badge = re.search(rf"(.*?){COMMENT_MARKER}", file_contents, re.DOTALL)
-    return existing_badge.group(1).strip() if existing_badge else ""
+        matches = re.finditer(rf"(.*?){COMMENT_MARKER}", file_contents, re.MULTILINE)
+        for match in matches:
+            return match.group(1)
 
 
 def update_existing_badge(file_path, existing_badge, new_badge) -> None:
@@ -123,6 +123,16 @@ def add_new_badge(file_path, new_badge) -> None:
     print("Added new badge.")
 
 
+def print_badge_content(badge_string, flag=False) -> None:
+    if flag:
+        print("Existing Badge:")
+    else:
+        print("New Badge:")
+    print("=" * 80)
+    print(f"{badge_string}")
+    print("=" * 80 + "\n")
+
+
 def main():
     parser = get_parser()
     args = parser.parse_args()
@@ -136,7 +146,7 @@ def main():
     update_badge = args.update_badge
 
     existing_badge = get_existing_badge(file_path)
-    print(f"existing_badge is {existing_badge}")
+    print_badge_content(existing_badge, flag=True)
 
     url = f"https://github.com/{repo_name}/network/dependents"
     deps_number = get_dependents_number(url)
@@ -150,7 +160,7 @@ def main():
             repo_name, deps_number, badge_label, badge_color, badge_logo
         )
 
-    print(f"new_badge is {new_badge}")
+    print_badge_content(new_badge)
     if new_badge == existing_badge:
         return
 
