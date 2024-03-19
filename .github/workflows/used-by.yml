@@ -13,7 +13,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: shenxianpeng/used-by@main
         with:
-          repo: '${{ github.repository }}' # current repository
+          repo: cpp-linter/cpp-linter-action
           update-badge: 'true'
 
       - name: Create Pull Request
