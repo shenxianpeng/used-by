@@ -10,23 +10,23 @@ Generate Used By badge from GitHub dependents information.
 
 ### Run as GitHub Action
 
-Create a new GitHub Actions workflow in your project, e.g. at [.github/workflows/used-by.yml](.github/workflows/used-by.yml)
+Create a new GitHub Actions workflow in your project, e.g. at `.github/workflows/used-by.yml`
 
 ```yaml
     steps:
       - uses: actions/checkout@v4
-      - uses: shenxianpeng/used-by@v2
+      - uses: shenxianpeng/used-by@main # or tag
         with:
           repo: '${{ github.repository }}' # current repository
           update-badge: 'true'
 
-      # create pull request if any changes
+      # create pull request if changed
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v6
         with:
           add-paths: "README.md" # the file path to commit
           commit-message: "chore: update used-by badge by github-actions[bot]"
-          title: "chore: automatically update used-by badge"
+          title: "chore: automatic update used-by badge"
           base: main
           labels: documentation
           delete-branch: true

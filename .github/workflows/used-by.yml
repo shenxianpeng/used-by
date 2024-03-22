@@ -1,9 +1,10 @@
-name: Used By
+name: used by self test
 
 on:
-  schedule:
-    # https://crontab.guru/
-    - cron: '0 8 * * *' # At 08:00
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
   workflow_dispatch:
 
 jobs:
@@ -11,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: ./
+      - uses: ./  # self test
         with:
           repo: '${{ github.repository }}' # current repository
           update-badge: 'true'
@@ -21,7 +22,7 @@ jobs:
         with:
           add-paths: "README.md" # the file path to commit
           commit-message: "chore: update used-by badge by github-actions[bot]"
-          title: "chore: automatically update used-by badge"
+          title: "chore: automatic update used-by badge"
           base: main
           labels: documentation
           delete-branch: true
