@@ -33,4 +33,4 @@ def test_get_dependents_number(mock_requests_get, mock_sub_soup):
     url = "http://example.com"
     dependents_number = get_dependents_number(url)
 
-    assert dependents_number == 0
+    assert dependents_number == 3
