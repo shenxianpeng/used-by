@@ -57,15 +57,19 @@ def get_soup(url: str) -> BeautifulSoup:
 
 
 def get_dependents_number(url: str) -> int:
+    total_number = 0
     soup = get_soup(url)
     menu_items = soup.find_all("a", class_="select-menu-item")
-
-    total_number = 0
+    print(f"menu_items = {menu_items}")
 
     for menu_item in menu_items:
         href = menu_item["href"]
         sub_soup = get_soup(url=f"https://github.com{href}")
         repo_text = sub_soup.find("a", class_="btn-link selected").get_text(strip=True)
+        repo_number = int(repo_text.split()[0])
+        total_number += repo_number
+    else:
+        repo_text = soup.find("a", class_="btn-link selected").get_text(strip=True)
         repo_number = int(repo_text.split()[0])
         total_number += repo_number
 
