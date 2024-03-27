@@ -5,7 +5,7 @@
 [![pre-commit](https://github.com/shenxianpeng/used-by/actions/workflows/pre-commit.yml/badge.svg)](https://github.com/shenxianpeng/used-by/actions/workflows/pre-commit.yml)
 [![codecov](https://codecov.io/github/shenxianpeng/used-by/graph/badge.svg?token=QDO4MCI87B)](https://codecov.io/github/shenxianpeng/used-by)
 
-Generate Used By badge from GitHub dependents information.
+Create and update Used By badge by leveraging GitHub's dependencies information via a pull request.
 
 ## Usage
 
