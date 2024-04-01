@@ -7,7 +7,7 @@ from pathlib import Path
 from used_by import COMMENT_MARKER
 
 
-def get_parser():
+def get_parser():  # pragma: no cover
     parser = argparse.ArgumentParser(
         prog="used-by",
         description="Generate a Used By badge from GitHub dependents information.",
@@ -56,24 +56,23 @@ def get_soup(url: str) -> BeautifulSoup:
     return soup
 
 
+def get_repo_number(soup):
+    repo_text = soup.find("a", class_="btn-link selected").get_text(strip=True)
+    return int(repo_text.split()[0])
+
+
 def get_dependents_number(url: str) -> int:
     total_number = 0
     soup = get_soup(url)
     menu_items = soup.find_all("a", class_="select-menu-item")
 
-    if not menu_items:  # if menu_items is empty
-        repo_text = soup.find("a", class_="btn-link selected").get_text(strip=True)
-        repo_number = int(repo_text.split()[0])
-        total_number += repo_number
-    else:
+    if menu_items:  # menu_items is not empty
         for menu_item in menu_items:
             href = menu_item["href"]
             sub_soup = get_soup(url=f"https://github.com{href}")
-            repo_text = sub_soup.find("a", class_="btn-link selected").get_text(
-                strip=True
-            )
-            repo_number = int(repo_text.split()[0])
-            total_number += repo_number
+            total_number += get_repo_number(sub_soup)
+    else:
+        total_number += get_repo_number(soup)
 
     return total_number
 
@@ -139,7 +138,7 @@ def print_badge_content(badge_string, flag=False) -> None:
     print("=" * 80 + "\n")
 
 
-def main():
+def main():  # pragma: no cover
     parser = get_parser()
     args = parser.parse_args()
 
