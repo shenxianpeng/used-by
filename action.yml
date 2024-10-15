@@ -36,10 +36,10 @@ runs:
     - name: Install and run used-by
       shell: bash
       run: |
-        # try to fix https://github.com/pypa/setuptools/issues/3269
-        python3 -m pip install pip -U
         python3 -m venv venv
         source venv/bin/activate
+        # try to fix https://github.com/pypa/setuptools/issues/3269
+        python3 -m pip install pip -U
         pip install -r "$GITHUB_ACTION_PATH/requirements.txt"
 
         used-by \
