@@ -40,7 +40,7 @@ runs:
         python3 -m pip install pip -U
         python3 -m venv venv
         source venv/bin/activate
-        pip install git+https://github.com/shenxianpeng/used-by.git@main
+        pip install -r "$GITHUB_ACTION_PATH/requirements.txt"
 
         used-by \
          --repo="${{ inputs.repo }}" \
