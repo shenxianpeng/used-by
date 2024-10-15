@@ -50,6 +50,7 @@ jobs:
         with:
           name: coverage-data-${{ runner.os }}
           path: .coverage*
+          if-no-files-found: error
 
   coverage:
     needs: [build]
