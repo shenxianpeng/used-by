@@ -1,2 +1,2 @@
 # Install used-by https://pypi.org/project/used-by/
-used-by==0.1.2
+used-by==0.1.3
