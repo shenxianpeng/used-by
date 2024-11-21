@@ -28,6 +28,7 @@ Create a new GitHub Actions workflow in your project, e.g. at `.github/workflows
           add-paths: "README.md" # the file path to commit
           commit-message: "chore: update used-by badge by github-actions[bot]"
           title: "chore: automatic update used-by badge"
+          body: "Automated changes by [used-by](https://github.com/shenxianpeng/used-by) GitHub action."
           base: main
           labels: documentation
           delete-branch: true
