@@ -43,17 +43,14 @@ jobs:
           python3 -m pip install . -r requirements-dev.txt
 
       - name: Collect Coverage
-        run: coverage run -m pytest -vv
+        run: |
+          coverage run -m pytest -vv
+          coverage report && coverage xml
 
-      - name: Upload coverage data
-        uses: actions/upload-artifact@v4
+      - uses: codecov/codecov-action@v5
+        env:
+          CODECOV_TOKEN: ${{secrets.CODECOV_TOKEN}}
         with:
-          name: coverage-data-${{ runner.os }}
-          path: .coverage*
-          if-no-files-found: error
-          include-hidden-files: true
-
-  coverage:
-    needs: [build]
-    uses: shenxianpeng/.github/.github/workflows/py-coverage.yml@main
-    secrets: inherit
+          files: ./coverage.xml
+          fail_ci_if_error: true # optional (default = false)
+          verbose: true # optional (default = false)
