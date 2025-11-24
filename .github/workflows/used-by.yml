@@ -15,7 +15,7 @@ jobs:
   used-by:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: ./  # self test
         with:
           repo: '${{ github.repository }}' # current repository
