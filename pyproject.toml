@@ -9,7 +9,7 @@ readme = "README.md"
 keywords = ["used by", "dependencies"]
 license = {text = "MIT License"}
 authors = [
-    { name = "shenxianpeng", email = "xianpeng.shen@gmail.com" },
+    { name = "Xianpeng Shen", email = "xianpeng.shen@gmail.com" },
 ]
 dependencies = ["requests", "bs4"]
 classifiers = [
