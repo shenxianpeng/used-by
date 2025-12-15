@@ -32,7 +32,7 @@ jobs:
         run: python -m pip wheel -w dist .
 
       - name: Upload wheel as artifact
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: used-by_wheel
           path: dist/*.whl
