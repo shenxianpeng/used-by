@@ -1,5 +1,7 @@
+import sys
 import pytest
 import pytest_mock
+import requests
 from bs4 import BeautifulSoup
 from used_by.main import (
     get_soup,
@@ -11,6 +13,7 @@ from used_by.main import (
     get_existing_badge,
     update_existing_badge,
     print_badge_content,
+    main,
 )
 from used_by import COMMENT_MARKER
 
@@ -28,6 +31,14 @@ def test_get_soup(mock_requests_get):
     url = "http://example.com"
     soup = get_soup(url)
     assert isinstance(soup, BeautifulSoup)
+
+
+def test_get_soup_raises_on_http_error(mocker):
+    mock_response = mocker.MagicMock()
+    mock_response.raise_for_status.side_effect = requests.HTTPError("404 Not Found")
+    mocker.patch("requests.get", return_value=mock_response)
+    with pytest.raises(requests.HTTPError):
+        get_soup("http://example.com/notfound")
 
 
 def test_get_repo_number(mocker):
@@ -146,3 +157,84 @@ def test_print_new_badge(capfd):
         "New Badge:\n" + "=" * 80 + f"\n{badge_string}\n" + "=" * 80 + "\n\n"
     )
     assert captured.out == expected_output
+
+
+# Tests for main()
+
+
+def test_main_adds_new_md_badge(mocker):
+    mocker.patch("sys.argv", ["used-by", "--repo", "user/repo"])
+    mocker.patch("used_by.main.get_existing_badge", return_value="")
+    mocker.patch("used_by.main.get_dependents_number", return_value=10)
+    mocker.patch("used_by.main.generate_markdown_badge", return_value="new_badge")
+    mocker.patch("used_by.main.print_badge_content")
+    mock_add = mocker.patch("used_by.main.add_new_badge")
+
+    main()
+
+    mock_add.assert_called_once_with("README.md", "new_badge")
+
+
+def test_main_updates_existing_md_badge(mocker):
+    mocker.patch(
+        "sys.argv",
+        ["used-by", "--repo", "user/repo", "--update-badge", "true"],
+    )
+    mocker.patch("used_by.main.get_existing_badge", return_value="old_badge")
+    mocker.patch("used_by.main.get_dependents_number", return_value=10)
+    mocker.patch("used_by.main.generate_markdown_badge", return_value="new_badge")
+    mocker.patch("used_by.main.print_badge_content")
+    mock_update = mocker.patch("used_by.main.update_existing_badge")
+
+    main()
+
+    mock_update.assert_called_once_with("README.md", "old_badge", "new_badge")
+
+
+def test_main_skips_update_when_badge_unchanged(mocker):
+    mocker.patch("sys.argv", ["used-by", "--repo", "user/repo"])
+    mocker.patch("used_by.main.get_existing_badge", return_value="same_badge")
+    mocker.patch("used_by.main.get_dependents_number", return_value=10)
+    mocker.patch("used_by.main.generate_markdown_badge", return_value="same_badge")
+    mocker.patch("used_by.main.print_badge_content")
+    mock_update = mocker.patch("used_by.main.update_existing_badge")
+    mock_add = mocker.patch("used_by.main.add_new_badge")
+
+    main()
+
+    mock_update.assert_not_called()
+    mock_add.assert_not_called()
+
+
+def test_main_adds_new_rst_badge(mocker):
+    mocker.patch(
+        "sys.argv",
+        ["used-by", "--repo", "user/repo", "--file-path", "README.rst"],
+    )
+    mocker.patch("used_by.main.get_existing_badge", return_value="")
+    mocker.patch("used_by.main.get_dependents_number", return_value=5)
+    mock_rst = mocker.patch("used_by.main.generate_rst_badge", return_value="rst_badge")
+    mocker.patch("used_by.main.print_badge_content")
+    mock_add = mocker.patch("used_by.main.add_new_badge")
+
+    main()
+
+    mock_rst.assert_called_once()
+    mock_add.assert_called_once_with("README.rst", "rst_badge")
+
+
+def test_main_unsupported_file_type(mocker, capsys):
+    mocker.patch(
+        "sys.argv",
+        ["used-by", "--repo", "user/repo", "--file-path", "README.txt"],
+    )
+    mocker.patch("used_by.main.get_existing_badge", return_value="")
+    mocker.patch("used_by.main.get_dependents_number", return_value=5)
+    mocker.patch("used_by.main.print_badge_content")
+    mock_add = mocker.patch("used_by.main.add_new_badge")
+
+    main()
+
+    mock_add.assert_not_called()
+    captured = capsys.readouterr()
+    assert "Unsupported file type" in captured.out

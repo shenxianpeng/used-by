@@ -51,7 +51,8 @@ def get_parser():  # pragma: no cover
 
 
 def get_soup(url: str) -> BeautifulSoup:
-    response = requests.get(url)
+    response = requests.get(url, timeout=10)
+    response.raise_for_status()
     soup = BeautifulSoup(response.content, "html.parser")
     return soup
 
@@ -105,7 +106,7 @@ def generate_rst_badge(
 
 
 def get_existing_badge(file_path) -> str:
-    with open(file_path) as file:
+    with open(file_path, encoding="utf-8") as file:
         file_contents = file.read()
         matches = re.finditer(rf"(.*?){COMMENT_MARKER}", file_contents, re.MULTILINE)
         for match in matches:
@@ -113,17 +114,17 @@ def get_existing_badge(file_path) -> str:
 
 
 def update_existing_badge(file_path, existing_badge, new_badge) -> None:
-    with open(file_path) as file:
+    with open(file_path, encoding="utf-8") as file:
         file_contents = file.read()
     new_file_contents = file_contents.replace(existing_badge, new_badge)
-    with open(file_path, "w") as file:
+    with open(file_path, "w", encoding="utf-8") as file:
         file.write(new_file_contents)
     print("Updated existing badge.")
 
 
 # FIXME: add thread comments to pull request.
 def add_new_badge(file_path, new_badge) -> None:
-    with open(file_path, "a") as file:
+    with open(file_path, "a", encoding="utf-8") as file:
         file.write(f"\n{new_badge} {COMMENT_MARKER}")
     print("Added new badge.")
 
@@ -138,7 +139,7 @@ def print_badge_content(badge_string, flag=False) -> None:
     print("=" * 80 + "\n")
 
 
-def main():  # pragma: no cover
+def main():
     parser = get_parser()
     args = parser.parse_args()
 
@@ -164,6 +165,9 @@ def main():  # pragma: no cover
         new_badge = generate_rst_badge(
             repo_name, deps_number, badge_label, badge_color, badge_logo
         )
+    else:
+        print(f"Unsupported file type: .{file_type}. Only .md and .rst are supported.")
+        return
 
     print_badge_content(new_badge)
     if new_badge == existing_badge:
