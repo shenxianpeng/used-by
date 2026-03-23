@@ -15,7 +15,7 @@ from used_by.main import (
     print_badge_content,
     main,
 )
-from used_by import COMMENT_MARKER
+from used_by import COMMENT_MARKER, RST_COMMENT_MARKER
 
 # test get_soup using pytest and pytest-mock
 
@@ -125,6 +125,15 @@ def test_get_existing_badge(mocker):
     assert badge == "badge"
 
 
+def test_get_existing_rst_badge(mocker):
+    file_path = "dummy_file.rst"
+    badge_content = ".. image:: https://example.com/badge\n   :target: https://github.com/user/repo/network/dependents\n   :alt: Used by"
+    file_data = f"{RST_COMMENT_MARKER}\n{badge_content}\n{RST_COMMENT_MARKER}\n"
+    mocker.patch("builtins.open", mocker.mock_open(read_data=file_data))
+    badge = get_existing_badge(file_path)
+    assert badge == badge_content
+
+
 def test_update_existing_badge(mocker):
     file_path = "dummy_file.md"
     existing_badge = "existing_badge"
@@ -221,6 +230,22 @@ def test_main_adds_new_rst_badge(mocker):
 
     mock_rst.assert_called_once()
     mock_add.assert_called_once_with("README.rst", "rst_badge")
+
+
+def test_main_updates_existing_rst_badge(mocker):
+    mocker.patch(
+        "sys.argv",
+        ["used-by", "--repo", "user/repo", "--file-path", "README.rst", "--update-badge", "true"],
+    )
+    mocker.patch("used_by.main.get_existing_badge", return_value="old_rst_badge")
+    mocker.patch("used_by.main.get_dependents_number", return_value=5)
+    mocker.patch("used_by.main.generate_rst_badge", return_value="new_rst_badge")
+    mocker.patch("used_by.main.print_badge_content")
+    mock_update = mocker.patch("used_by.main.update_existing_badge")
+
+    main()
+
+    mock_update.assert_called_once_with("README.rst", "old_rst_badge", "new_rst_badge")
 
 
 def test_main_unsupported_file_type(mocker, capsys):
