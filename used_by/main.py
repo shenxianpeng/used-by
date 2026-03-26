@@ -59,7 +59,10 @@ def get_soup(url: str) -> BeautifulSoup:
 
 def get_repo_number(soup):
     repo_text = soup.find("a", class_="btn-link selected").get_text(strip=True)
-    return int(repo_text.split()[0])
+    try:
+        return int(repo_text.split()[0])
+    except (ValueError, IndexError):
+        return 0
 
 
 def get_dependents_number(url: str) -> int:

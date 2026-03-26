@@ -153,7 +153,10 @@ def test_add_new_badge_rst_writes_with_markers():
         add_new_badge(tmp, badge_content)
         with open(tmp, encoding="utf-8") as f:
             written = f.read()
-        assert f"\n{RST_COMMENT_MARKER}\n{badge_content}\n{RST_COMMENT_MARKER}\n" in written
+        assert (
+            f"\n{RST_COMMENT_MARKER}\n{badge_content}\n{RST_COMMENT_MARKER}\n"
+            in written
+        )
         assert "Existing content" in written
     finally:
         os.unlink(tmp)
@@ -260,7 +263,15 @@ def test_main_adds_new_rst_badge(mocker):
 def test_main_updates_existing_rst_badge(mocker):
     mocker.patch(
         "sys.argv",
-        ["used-by", "--repo", "user/repo", "--file-path", "README.rst", "--update-badge", "true"],
+        [
+            "used-by",
+            "--repo",
+            "user/repo",
+            "--file-path",
+            "README.rst",
+            "--update-badge",
+            "true",
+        ],
     )
     mocker.patch("used_by.main.get_existing_badge", return_value="old_rst_badge")
     mocker.patch("used_by.main.get_dependents_number", return_value=5)
