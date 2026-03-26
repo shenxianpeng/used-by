@@ -4,7 +4,7 @@ import re
 from urllib.parse import quote
 from bs4 import BeautifulSoup
 from pathlib import Path
-from used_by import COMMENT_MARKER
+from used_by import COMMENT_MARKER, RST_COMMENT_MARKER
 
 
 def get_parser():  # pragma: no cover
@@ -59,7 +59,10 @@ def get_soup(url: str) -> BeautifulSoup:
 
 def get_repo_number(soup):
     repo_text = soup.find("a", class_="btn-link selected").get_text(strip=True)
-    return int(repo_text.split()[0])
+    try:
+        return int(repo_text.split()[0])
+    except (ValueError, IndexError):
+        return 0
 
 
 def get_dependents_number(url: str) -> int:
@@ -97,20 +100,29 @@ def generate_markdown_badge(
 def generate_rst_badge(
     repo_name, deps_number, badge_label, badge_color, badge_logo
 ) -> str:
-    badge_content = f"""
-.. image:: {generate_badge_url(deps_number, badge_label, badge_color, badge_logo)}
-   :target: https://github.com/{repo_name}/network/dependents
-   :alt: {badge_label}
-"""
+    badge_content = (
+        f".. image:: {generate_badge_url(deps_number, badge_label, badge_color, badge_logo)}\n"
+        f"   :target: https://github.com/{repo_name}/network/dependents\n"
+        f"   :alt: {badge_label}"
+    )
     return badge_content
 
 
 def get_existing_badge(file_path) -> str:
+    file_type = Path(file_path).suffix[1:].lower()
     with open(file_path, encoding="utf-8") as file:
         file_contents = file.read()
+    if file_type == "rst":
+        matches = re.finditer(
+            rf"{RST_COMMENT_MARKER}\n(.*?)\n{RST_COMMENT_MARKER}",
+            file_contents,
+            re.DOTALL,
+        )
+    else:
         matches = re.finditer(rf"(.*?){COMMENT_MARKER}", file_contents, re.MULTILINE)
-        for match in matches:
-            return match.group(1)
+    for match in matches:
+        return match.group(1)
+    return ""
 
 
 def update_existing_badge(file_path, existing_badge, new_badge) -> None:
@@ -124,8 +136,12 @@ def update_existing_badge(file_path, existing_badge, new_badge) -> None:
 
 # FIXME: add thread comments to pull request.
 def add_new_badge(file_path, new_badge) -> None:
+    file_type = Path(file_path).suffix[1:].lower()
     with open(file_path, "a", encoding="utf-8") as file:
-        file.write(f"\n{new_badge} {COMMENT_MARKER}")
+        if file_type == "rst":
+            file.write(f"\n{RST_COMMENT_MARKER}\n{new_badge}\n{RST_COMMENT_MARKER}\n")
+        else:
+            file.write(f"\n{new_badge} {COMMENT_MARKER}")
     print("Added new badge.")
 
 
