@@ -1,4 +1,6 @@
 import sys
+import tempfile
+import os
 import pytest
 import pytest_mock
 import requests
@@ -11,6 +13,7 @@ from used_by.main import (
     generate_markdown_badge,
     generate_rst_badge,
     get_existing_badge,
+    add_new_badge,
     update_existing_badge,
     print_badge_content,
     main,
@@ -132,6 +135,28 @@ def test_get_existing_rst_badge(mocker):
     mocker.patch("builtins.open", mocker.mock_open(read_data=file_data))
     badge = get_existing_badge(file_path)
     assert badge == badge_content
+
+
+def test_get_existing_rst_badge_returns_empty_when_no_badge(mocker):
+    file_path = "dummy_file.rst"
+    mocker.patch("builtins.open", mocker.mock_open(read_data="No badge here\n"))
+    badge = get_existing_badge(file_path)
+    assert badge == ""
+
+
+def test_add_new_badge_rst_writes_with_markers():
+    badge_content = ".. image:: https://example.com/badge\n   :target: https://github.com/user/repo/network/dependents\n   :alt: Used by"
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".rst", delete=False) as f:
+        f.write("Existing content\n")
+        tmp = f.name
+    try:
+        add_new_badge(tmp, badge_content)
+        with open(tmp, encoding="utf-8") as f:
+            written = f.read()
+        assert f"\n{RST_COMMENT_MARKER}\n{badge_content}\n{RST_COMMENT_MARKER}\n" in written
+        assert "Existing content" in written
+    finally:
+        os.unlink(tmp)
 
 
 def test_update_existing_badge(mocker):
