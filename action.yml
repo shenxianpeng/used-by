@@ -35,17 +35,27 @@ runs:
   steps:
     - name: Install and run used-by
       shell: bash
+      env:
+        # Pass inputs through the environment instead of expanding them into
+        # the script, so their values are never interpreted by the shell.
+        USED_BY_REPO: ${{ inputs.repo }}
+        USED_BY_FILE_PATH: ${{ inputs.file-path }}
+        USED_BY_BADGE_LABEL: ${{ inputs.badge-label }}
+        USED_BY_BADGE_COLOR: ${{ inputs.badge-color }}
+        USED_BY_BADGE_LOGO: ${{ inputs.badge-logo }}
+        USED_BY_UPDATE_BADGE: ${{ inputs.update-badge }}
       run: |
-        python3 -m venv venv
-        source venv/bin/activate
+        # Keep the virtualenv out of the caller's checkout.
+        python3 -m venv "$RUNNER_TEMP/used-by-venv"
+        source "$RUNNER_TEMP/used-by-venv/bin/activate"
         # try to fix https://github.com/pypa/setuptools/issues/3269
         python3 -m pip install pip -U
         pip install -r "$GITHUB_ACTION_PATH/requirements.txt"
 
         used-by \
-         --repo="${{ inputs.repo }}" \
-         --file-path="${{ inputs.file-path }}" \
-         --badge-label="${{ inputs.badge-label }}" \
-         --badge-color="${{ inputs.badge-color }}" \
-         --badge-logo="${{ inputs.badge-logo }}" \
-         --update-badge=${{ inputs.update-badge }}
+         --repo="$USED_BY_REPO" \
+         --file-path="$USED_BY_FILE_PATH" \
+         --badge-label="$USED_BY_BADGE_LABEL" \
+         --badge-color="$USED_BY_BADGE_COLOR" \
+         --badge-logo="$USED_BY_BADGE_LOGO" \
+         --update-badge="$USED_BY_UPDATE_BADGE"
