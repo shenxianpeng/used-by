@@ -7,7 +7,7 @@ from pathlib import Path
 from used_by import COMMENT_MARKER, RST_COMMENT_MARKER
 
 
-def get_parser():  # pragma: no cover
+def get_parser():
     parser = argparse.ArgumentParser(
         prog="used-by",
         description="Generate a Used By badge from GitHub dependents information.",
