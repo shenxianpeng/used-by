@@ -189,10 +189,10 @@ def main():
     if new_badge == existing_badge:
         return
 
-    if update_badge:
-        update_existing_badge(file_path, existing_badge, new_badge)
     if existing_badge == "":
         add_new_badge(file_path, new_badge)
+    elif update_badge:
+        update_existing_badge(file_path, existing_badge, new_badge)
 
 
 if __name__ == "__main__":

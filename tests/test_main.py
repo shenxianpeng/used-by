@@ -541,3 +541,34 @@ def test_main_keeps_outdated_badge_without_update_flag(
     run_main(mocker)
 
     assert readme.read_text() == original
+
+
+def test_main_update_flag_without_existing_badge_only_appends(
+    tmp_path, monkeypatch, mocker, fake_github
+):
+    # Regression test: replacing the empty "existing badge" used to insert the
+    # new badge between every character of the file.
+    monkeypatch.chdir(tmp_path)
+    readme = tmp_path / "README.md"
+    readme.write_text("# Demo\n\nSome text.\n")
+    fake_github.pages[DEPENDENTS_URL] = make_dependents_page(3)
+
+    run_main(mocker, "--update-badge", "true")
+
+    assert readme.read_text() == (
+        f"# Demo\n\nSome text.\n\n{md_badge(3)} {COMMENT_MARKER}"
+    )
+
+
+def test_main_update_flag_without_existing_badge_skips_update(mocker):
+    mocker.patch("used_by.main.get_existing_badge", return_value="")
+    mocker.patch("used_by.main.get_dependents_number", return_value=10)
+    mocker.patch("used_by.main.generate_markdown_badge", return_value="new_badge")
+    mocker.patch("used_by.main.print_badge_content")
+    mock_update = mocker.patch("used_by.main.update_existing_badge")
+    mock_add = mocker.patch("used_by.main.add_new_badge")
+
+    run_main(mocker, "--update-badge", "true")
+
+    mock_update.assert_not_called()
+    mock_add.assert_called_once_with("README.md", "new_badge")
