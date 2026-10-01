@@ -589,3 +589,27 @@ def test_get_dependents_number_sums_large_package_counts(fake_github):
     fake_github.pages[f"https://github.com{package}"] = make_dependents_page("1,234")
 
     assert get_dependents_number(DEPENDENTS_URL) == 1234
+
+
+def test_get_repo_number_raises_clear_error_when_counter_is_missing():
+    # e.g. GitHub changed its markup or served an unexpected page
+    soup = BeautifulSoup(
+        "<html><body>Something went wrong</body></html>", "html.parser"
+    )
+    with pytest.raises(ValueError, match="Could not find the dependents count"):
+        get_repo_number(soup)
+
+
+def test_main_fails_without_touching_file_when_counter_is_missing(
+    tmp_path, monkeypatch, mocker, fake_github
+):
+    monkeypatch.chdir(tmp_path)
+    readme = tmp_path / "README.md"
+    original = f"# Demo\n{md_badge(3)}{COMMENT_MARKER}\n"
+    readme.write_text(original)
+    fake_github.pages[DEPENDENTS_URL] = b"<html><body>Unexpected page</body></html>"
+
+    with pytest.raises(ValueError):
+        run_main(mocker, "--update-badge", "true")
+
+    assert readme.read_text() == original

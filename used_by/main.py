@@ -58,7 +58,13 @@ def get_soup(url: str) -> BeautifulSoup:
 
 
 def get_repo_number(soup):
-    repo_text = soup.find("a", class_="btn-link selected").get_text(strip=True)
+    counter = soup.find("a", class_="btn-link selected")
+    if counter is None:
+        raise ValueError(
+            "Could not find the dependents count on the GitHub dependents page; "
+            "the page layout may have changed."
+        )
+    repo_text = counter.get_text(strip=True)
     try:
         # GitHub renders large counts with thousands separators, e.g. "4,237,401"
         return int(repo_text.split()[0].replace(",", ""))
