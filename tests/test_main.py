@@ -572,3 +572,20 @@ def test_main_update_flag_without_existing_badge_skips_update(mocker):
 
     mock_update.assert_not_called()
     mock_add.assert_called_once_with("README.md", "new_badge")
+
+
+@pytest.mark.parametrize("text, expected", [("1,234", 1234), ("4,237,401", 4237401)])
+def test_get_repo_number_handles_thousands_separators(text, expected):
+    # Regression test: GitHub formats large counts as "4,237,401 Repositories".
+    soup = BeautifulSoup(make_dependents_page(text), "html.parser")
+    assert get_repo_number(soup) == expected
+
+
+def test_get_dependents_number_sums_large_package_counts(fake_github):
+    package = f"/{REPO}/network/dependents?package_id=UGFja2FnZS0x"
+    fake_github.pages[DEPENDENTS_URL] = make_dependents_page(
+        "1,234", packages=[("demo", package)]
+    )
+    fake_github.pages[f"https://github.com{package}"] = make_dependents_page("1,234")
+
+    assert get_dependents_number(DEPENDENTS_URL) == 1234
