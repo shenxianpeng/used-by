@@ -508,10 +508,10 @@ def test_main_end_to_end_markdown(tmp_path, monkeypatch, mocker, fake_github):
 
     fake_github.pages[DEPENDENTS_URL] = make_dependents_page(4)
     run_main(mocker, "--update-badge", "true")
-    assert readme.read_text() == f"# Demo\n\n{md_badge(4)}{COMMENT_MARKER}"
+    assert readme.read_text() == f"# Demo\n\n{md_badge(4)} {COMMENT_MARKER}"
 
     run_main(mocker, "--update-badge", "true")
-    assert readme.read_text() == f"# Demo\n\n{md_badge(4)}{COMMENT_MARKER}"
+    assert readme.read_text() == f"# Demo\n\n{md_badge(4)} {COMMENT_MARKER}"
 
 
 def test_main_end_to_end_rst(tmp_path, monkeypatch, mocker, fake_github):
@@ -641,3 +641,44 @@ def test_main_keeps_outdated_badge_when_update_badge_is_false(
     run_main(mocker, "--update-badge=false")
 
     assert readme.read_text() == original
+
+
+CI_BADGE = "[![CI](https://ci.example/badge.svg)](https://ci.example/runs)"
+
+
+def test_get_existing_badge_md_ignores_other_badges_on_the_same_line(tmp_path):
+    readme = tmp_path / "README.md"
+    readme.write_text(f"# Demo\n{CI_BADGE} {md_badge(3)}{COMMENT_MARKER}\n")
+    assert get_existing_badge(readme) == md_badge(3)
+
+
+def test_main_update_keeps_other_badges_on_the_same_line(
+    tmp_path, monkeypatch, mocker, fake_github
+):
+    # Regression test: the whole line before the marker used to be replaced,
+    # deleting any other badge or text in front of the Used By badge.
+    monkeypatch.chdir(tmp_path)
+    readme = tmp_path / "README.md"
+    readme.write_text(f"# Demo\n{CI_BADGE} {md_badge(3)}{COMMENT_MARKER}\n")
+    fake_github.pages[DEPENDENTS_URL] = make_dependents_page(4)
+
+    run_main(mocker, "--update-badge", "true")
+
+    assert readme.read_text() == f"# Demo\n{CI_BADGE} {md_badge(4)}{COMMENT_MARKER}\n"
+
+
+def test_main_leaves_freshly_added_badge_untouched(
+    tmp_path, monkeypatch, mocker, fake_github
+):
+    monkeypatch.chdir(tmp_path)
+    readme = tmp_path / "README.md"
+    readme.write_text("# Demo\n")
+    fake_github.pages[DEPENDENTS_URL] = make_dependents_page(3)
+    run_main(mocker)
+    added = readme.read_text()
+    write = mocker.patch("used_by.main.update_existing_badge")
+
+    run_main(mocker, "--update-badge", "true")
+
+    write.assert_not_called()
+    assert readme.read_text() == added == f"# Demo\n\n{md_badge(3)} {COMMENT_MARKER}"

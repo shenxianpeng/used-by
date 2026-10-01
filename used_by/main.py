@@ -7,6 +7,9 @@ from pathlib import Path
 from used_by import COMMENT_MARKER, RST_COMMENT_MARKER
 
 FALSE_VALUES = {"", "0", "f", "false", "n", "no", "off"}
+# A Markdown image link such as [![Used by](<image url>)](<link url>) that is
+# followed only by whitespace, i.e. the badge right before the comment marker.
+MD_BADGE_PATTERN = re.compile(r"\[!\[[^\]]*\]\([^)]*\)\]\([^)]*\)(?=\s*$)")
 
 
 def str_to_bool(value: str) -> bool:
@@ -136,7 +139,13 @@ def get_existing_badge(file_path) -> str:
     else:
         matches = re.finditer(rf"(.*?){COMMENT_MARKER}", file_contents, re.MULTILINE)
     for match in matches:
-        return match.group(1)
+        badge = match.group(1)
+        if file_type == "rst":
+            return badge
+        # Keep other badges or text on the same line out of the match so that
+        # updating the badge does not delete them.
+        md_badge = MD_BADGE_PATTERN.search(badge)
+        return md_badge.group() if md_badge else badge
     return ""
 
 
