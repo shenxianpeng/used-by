@@ -9,8 +9,8 @@ updates:
     directory: /
     schedule:
       interval: "weekly"
-    reviewers:
-      - "shenxianpeng"
+    cooldown:
+      default-days: 7
     groups:
       actions:
         patterns:
@@ -20,8 +20,8 @@ updates:
     directory: /
     schedule:
       interval: "weekly"
-    reviewers:
-      - "shenxianpeng"
+    cooldown:
+      default-days: 7
     groups:
       pip:
         patterns:

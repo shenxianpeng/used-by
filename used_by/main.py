@@ -6,8 +6,18 @@ from bs4 import BeautifulSoup
 from pathlib import Path
 from used_by import COMMENT_MARKER, RST_COMMENT_MARKER
 
+FALSE_VALUES = {"", "0", "f", "false", "n", "no", "off"}
+# A Markdown image link such as [![Used by](<image url>)](<link url>) that is
+# followed only by whitespace, i.e. the badge right before the comment marker.
+MD_BADGE_PATTERN = re.compile(r"\[!\[[^\]]*\]\([^)]*\)\]\([^)]*\)(?=\s*$)")
 
-def get_parser():  # pragma: no cover
+
+def str_to_bool(value: str) -> bool:
+    """Parse a flag value such as an action input ("false" -> False)."""
+    return value.strip().lower() not in FALSE_VALUES
+
+
+def get_parser():
     parser = argparse.ArgumentParser(
         prog="used-by",
         description="Generate a Used By badge from GitHub dependents information.",
@@ -44,6 +54,7 @@ def get_parser():  # pragma: no cover
     parser.add_argument(
         "--update-badge",
         default=False,
+        type=str_to_bool,
         help="Add or update badge if set. Defaults to False.",
     )
 
@@ -58,9 +69,16 @@ def get_soup(url: str) -> BeautifulSoup:
 
 
 def get_repo_number(soup):
-    repo_text = soup.find("a", class_="btn-link selected").get_text(strip=True)
+    counter = soup.find("a", class_="btn-link selected")
+    if counter is None:
+        raise ValueError(
+            "Could not find the dependents count on the GitHub dependents page; "
+            "the page layout may have changed."
+        )
+    repo_text = counter.get_text(strip=True)
     try:
-        return int(repo_text.split()[0])
+        # GitHub renders large counts with thousands separators, e.g. "4,237,401"
+        return int(repo_text.split()[0].replace(",", ""))
     except (ValueError, IndexError):
         return 0
 
@@ -121,7 +139,13 @@ def get_existing_badge(file_path) -> str:
     else:
         matches = re.finditer(rf"(.*?){COMMENT_MARKER}", file_contents, re.MULTILINE)
     for match in matches:
-        return match.group(1)
+        badge = match.group(1)
+        if file_type == "rst":
+            return badge
+        # Keep other badges or text on the same line out of the match so that
+        # updating the badge does not delete them.
+        md_badge = MD_BADGE_PATTERN.search(badge)
+        return md_badge.group() if md_badge else badge
     return ""
 
 
@@ -189,10 +213,10 @@ def main():
     if new_badge == existing_badge:
         return
 
-    if update_badge:
-        update_existing_badge(file_path, existing_badge, new_badge)
     if existing_badge == "":
         add_new_badge(file_path, new_badge)
+    elif update_badge:
+        update_existing_badge(file_path, existing_badge, new_badge)
 
 
 if __name__ == "__main__":

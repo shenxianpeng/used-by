@@ -5,3 +5,5 @@ build/
 dist/
 .coverage
 .gstack/
+coverage.xml
+htmlcov/
