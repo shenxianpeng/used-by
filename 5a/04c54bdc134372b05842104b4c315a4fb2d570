@@ -1,0 +1,27 @@
+.github/dependabot.yml
+  s_66212c309e21f0::t_aefaadac077702 12-13,25-26
+.github/workflows/main.yml
+  s_66212c309e21f0::t_005fdf63728a44 20-21,28-29,54
+.github/workflows/pre-commit.yml
+  s_66212c309e21f0::t_86f68cf987d7dc 8-10
+.github/workflows/publish.yml
+  s_66212c309e21f0::t_9585757b5b22a2 12-14
+.github/workflows/used-by.yml
+  s_66212c309e21f0::t_ea08ebc55d867f 19-20,27
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "5a04c54bdc134372b05842104b4c315a4fb2d570",
+  "prompts": {},
+  "sessions": {
+    "s_66212c309e21f0": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "8763d161-5362-48a1-ae9b-11f7bcd83469",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Xianpeng Shen <xianpeng.shen@gmail.com>"
+    }
+  }
+}
