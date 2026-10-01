@@ -15,7 +15,7 @@ Create a new GitHub Actions workflow in your project, e.g. at `.github/workflows
 
 ```yaml
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: shenxianpeng/used-by@main # or tag
         with:
           repo: '${{ github.repository }}' # current repository
@@ -23,7 +23,7 @@ Create a new GitHub Actions workflow in your project, e.g. at `.github/workflows
 
       # create pull request if changed
       - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v6
+        uses: peter-evans/create-pull-request@v8
         with:
           add-paths: "README.md" # the file path to commit
           commit-message: "chore: update used-by badge by github-actions[bot]"
@@ -34,7 +34,7 @@ Create a new GitHub Actions workflow in your project, e.g. at `.github/workflows
 ```
 
 > [!IMPORTANT]
-> To create pull request with `peter-evans/create-pull-request@v6` requires changing [Workflow permissions](https://github.com/peter-evans/create-pull-request?tab=readme-ov-file#workflow-permissions) to **Read and write permissions** and enabling  **Allow GitHub Actions to create and approve pull requests**.
+> To create pull request with `peter-evans/create-pull-request@v8` requires changing [Workflow permissions](https://github.com/peter-evans/create-pull-request?tab=readme-ov-file#workflow-permissions) to **Read and write permissions** and enabling  **Allow GitHub Actions to create and approve pull requests**.
 
 ## Required Inputs
 
@@ -57,11 +57,11 @@ Create a new GitHub Actions workflow in your project, e.g. at `.github/workflows
 * Default: 'informational'
 
 ### `badge-logo`:
-* Description: The badge display color. Defaults to slickpic.
+* Description: The badge display logo. Defaults to slickpic.
 * Default: 'slickpic'
 
 ### `update-badge`:
-* Description: The badge display color. Defaults to false.
+* Description: Update an existing badge whose count changed ('true' or 'false'); a missing badge is always added. Defaults to false.
 * Default: 'false'
 
 For supported values of `badge-label`, `badge-color` and `badge-logo`, see https://shields.io/badges/static-badge

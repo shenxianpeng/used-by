@@ -22,11 +22,11 @@ inputs:
     required: false
     default: 'informational'
   badge-logo:
-    description: The badge display color. Defaults to 'slickpic'.
+    description: The badge display logo. Defaults to 'slickpic'.
     required: false
     default: "slickpic"
   update-badge:
-    description: The badge display color. Defaults to 'false'.
+    description: Update an existing badge whose count changed ('true' or 'false'); a missing badge is always added. Defaults to 'false'.
     required: false
     default: "false"
 
