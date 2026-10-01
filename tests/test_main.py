@@ -388,7 +388,7 @@ def test_get_parser_reads_all_options():
     assert args.badge_label == "Dependents"
     assert args.badge_color == "green"
     assert args.badge_logo == "github"
-    assert args.update_badge == "true"
+    assert args.update_badge is True
 
 
 # get_soup / get_repo_number / get_dependents_number
@@ -611,5 +611,33 @@ def test_main_fails_without_touching_file_when_counter_is_missing(
 
     with pytest.raises(ValueError):
         run_main(mocker, "--update-badge", "true")
+
+    assert readme.read_text() == original
+
+
+@pytest.mark.parametrize("value", ["false", "False", "FALSE", "0", "no", "off", ""])
+def test_get_parser_update_badge_false_values(value):
+    # Regression test: the action passes --update-badge=false by default, which
+    # used to be kept as the (truthy) string "false".
+    args = get_parser().parse_args(["--repo", REPO, f"--update-badge={value}"])
+    assert args.update_badge is False
+
+
+@pytest.mark.parametrize("value", ["true", "True", "1", "yes", "on"])
+def test_get_parser_update_badge_true_values(value):
+    args = get_parser().parse_args(["--repo", REPO, f"--update-badge={value}"])
+    assert args.update_badge is True
+
+
+def test_main_keeps_outdated_badge_when_update_badge_is_false(
+    tmp_path, monkeypatch, mocker, fake_github
+):
+    monkeypatch.chdir(tmp_path)
+    readme = tmp_path / "README.md"
+    original = f"# Demo\n{md_badge(3)}{COMMENT_MARKER}\n"
+    readme.write_text(original)
+    fake_github.pages[DEPENDENTS_URL] = make_dependents_page(4)
+
+    run_main(mocker, "--update-badge=false")
 
     assert readme.read_text() == original

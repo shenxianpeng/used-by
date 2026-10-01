@@ -6,6 +6,13 @@ from bs4 import BeautifulSoup
 from pathlib import Path
 from used_by import COMMENT_MARKER, RST_COMMENT_MARKER
 
+FALSE_VALUES = {"", "0", "f", "false", "n", "no", "off"}
+
+
+def str_to_bool(value: str) -> bool:
+    """Parse a flag value such as an action input ("false" -> False)."""
+    return value.strip().lower() not in FALSE_VALUES
+
 
 def get_parser():
     parser = argparse.ArgumentParser(
@@ -44,6 +51,7 @@ def get_parser():
     parser.add_argument(
         "--update-badge",
         default=False,
+        type=str_to_bool,
         help="Add or update badge if set. Defaults to False.",
     )
 
