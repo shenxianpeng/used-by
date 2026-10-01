@@ -1,0 +1,21 @@
+.github/workflows/main.yml
+  s_66212c309e21f0::t_b9004554d18f4d 1,26-29,34,37,43,59-60
+pyproject.toml
+  s_66212c309e21f0::t_ac9553a0f8ef19 26-27
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "dbc043151b0e6bc94444b084ca22f61d1f87cd86",
+  "prompts": {},
+  "sessions": {
+    "s_66212c309e21f0": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "8763d161-5362-48a1-ae9b-11f7bcd83469",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Xianpeng Shen <xianpeng.shen@gmail.com>"
+    }
+  }
+}
