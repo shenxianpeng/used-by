@@ -9,6 +9,9 @@ on:
     types: [published]
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   publish:
     uses: shenxianpeng/.github/.github/workflows/py-publish.yml@main

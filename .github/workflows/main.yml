@@ -17,12 +17,16 @@ on:
       - "!docs/**"
   workflow_dispatch:
 
+permissions:
+  contents: read
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
       - name: Set up Python 3.10
         uses: actions/setup-python@v7
         with:
@@ -47,7 +51,7 @@ jobs:
           coverage run -m pytest -vv
           coverage report && coverage xml
 
-      - uses: codecov/codecov-action@v7
+      - uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
         env:
           CODECOV_TOKEN: ${{secrets.CODECOV_TOKEN}}
         with:
