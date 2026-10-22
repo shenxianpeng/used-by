@@ -63,6 +63,9 @@ branch = true
 source = ["used_by"]
 
 [tool.coverage.report]
+# The whole package is covered; keep it that way: `coverage report` in CI
+# fails below 100% lines and branches.
+fail_under = 100
 show_missing = true
 exclude_also = [
     'if __name__ == "__main__":',
