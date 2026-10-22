@@ -1,0 +1,21 @@
+.github/workflows/main.yml
+  s_6535937731a8c8::t_45fe618746ebd3 31,35,44
+.github/workflows/used-by.yml
+  s_6535937731a8c8::t_713d015474faec 18
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "ad197f70c9fd90cbe8d3957d89e44c6a0b5b6bc0",
+  "prompts": {},
+  "sessions": {
+    "s_6535937731a8c8": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "7be933fd-3555-4179-bf89-3d88091b3193",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "Xianpeng Shen <xianpeng.shen@gmail.com>"
+    }
+  }
+}
