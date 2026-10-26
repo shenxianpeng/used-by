@@ -32,3 +32,36 @@ jobs:
           base: main
           labels: skip-changelog
           delete-branch: true
+
+  other-sources:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - source: jenkins
+            package: explain-error
+          - source: deps.dev
+            ecosystem: pypi
+            package: requests
+          - source: deps.dev
+            ecosystem: npm
+            package: '@types/node'
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Create a scratch file for the badge
+        run: echo "# Self test" > "$RUNNER_TEMP/badge.md"
+      - uses: ./  # self test
+        with:
+          source: ${{ matrix.source }}
+          ecosystem: ${{ matrix.ecosystem }}
+          package: ${{ matrix.package }}
+          file-path: ${{ runner.temp }}/badge.md
+      - name: Check the badge was written
+        run: |
+          cat "$RUNNER_TEMP/badge.md"
+          grep -q "used by badge" "$RUNNER_TEMP/badge.md"

@@ -1,14 +1,30 @@
 name: Used By Action
-description: Generate Used By badge from GitHub dependents information.
+description: Generate a Used By badge from GitHub dependents, deps.dev dependents or Jenkins plugin installations.
 author: shenxianpeng
 branding:
   icon: "thumbs-up"
   color: "green"
 inputs:
+  source:
+    description: "Where the count comes from: 'github' (dependents of repo), 'deps.dev' (dependents of package in ecosystem) or 'jenkins' (installations of the plugin package). Defaults to 'github'."
+    required: false
+    default: 'github'
   repo:
-    description: GitHub repository name. e.g. shenxianpeng/used-by. Defaults to shenxianpeng/used-by.
-    required: true
+    description: GitHub repository name. e.g. shenxianpeng/used-by. Used with source 'github'. Defaults to shenxianpeng/used-by.
+    required: false
     default: 'shenxianpeng/used-by'
+  package:
+    description: Package name for source 'deps.dev' (e.g. requests), or plugin id for source 'jenkins' (e.g. explain-error).
+    required: false
+    default: ''
+  ecosystem:
+    description: "Package ecosystem for source 'deps.dev': npm, pypi, maven or cargo."
+    required: false
+    default: ''
+  package-version:
+    description: Package version for source 'deps.dev', which counts dependents per version. Defaults to the version deps.dev marks as default.
+    required: false
+    default: ''
   file-path:
     description: The path to file. Defaults to 'README.md'.
     required: false
@@ -30,7 +46,7 @@ inputs:
     required: false
     default: "false"
   max-drop:
-    description: Skip the update when the count drops by more than this percentage (0-100), which usually means GitHub returned bad data. Use 100 to accept any drop. Defaults to 50.
+    description: Skip the update when the count drops by more than this percentage (0-100), which usually means the source returned bad data. Use 100 to accept any drop. Defaults to 50.
     required: false
     default: "50"
 
@@ -42,7 +58,11 @@ runs:
       env:
         # Pass inputs through the environment instead of expanding them into
         # the script, so their values are never interpreted by the shell.
+        USED_BY_SOURCE: ${{ inputs.source }}
         USED_BY_REPO: ${{ inputs.repo }}
+        USED_BY_PACKAGE: ${{ inputs.package }}
+        USED_BY_ECOSYSTEM: ${{ inputs.ecosystem }}
+        USED_BY_PACKAGE_VERSION: ${{ inputs.package-version }}
         USED_BY_FILE_PATH: ${{ inputs.file-path }}
         USED_BY_BADGE_LABEL: ${{ inputs.badge-label }}
         USED_BY_BADGE_COLOR: ${{ inputs.badge-color }}
@@ -61,11 +81,19 @@ runs:
         cp -R "$GITHUB_ACTION_PATH" "$RUNNER_TEMP/used-by-src"
         pip install "$RUNNER_TEMP/used-by-src"
 
-        used-by \
-         --repo="$USED_BY_REPO" \
-         --file-path="$USED_BY_FILE_PATH" \
-         --badge-label="$USED_BY_BADGE_LABEL" \
-         --badge-color="$USED_BY_BADGE_COLOR" \
-         --badge-logo="$USED_BY_BADGE_LOGO" \
-         --update-badge="$USED_BY_UPDATE_BADGE" \
-         --max-drop="$USED_BY_MAX_DROP"
+        args=(
+          --source="$USED_BY_SOURCE"
+          --file-path="$USED_BY_FILE_PATH"
+          --badge-label="$USED_BY_BADGE_LABEL"
+          --badge-color="$USED_BY_BADGE_COLOR"
+          --badge-logo="$USED_BY_BADGE_LOGO"
+          --update-badge="$USED_BY_UPDATE_BADGE"
+          --max-drop="$USED_BY_MAX_DROP"
+        )
+        # Pass the optional inputs only when they are set.
+        if [ -n "$USED_BY_REPO" ]; then args+=(--repo="$USED_BY_REPO"); fi
+        if [ -n "$USED_BY_PACKAGE" ]; then args+=(--package="$USED_BY_PACKAGE"); fi
+        if [ -n "$USED_BY_ECOSYSTEM" ]; then args+=(--ecosystem="$USED_BY_ECOSYSTEM"); fi
+        if [ -n "$USED_BY_PACKAGE_VERSION" ]; then args+=(--package-version="$USED_BY_PACKAGE_VERSION"); fi
+
+        used-by "${args[@]}"

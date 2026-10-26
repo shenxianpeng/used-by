@@ -767,3 +767,93 @@ def test_main_updates_badge_on_small_drop(tmp_path, monkeypatch, mocker, fake_gi
     run_main(mocker, "--update-badge", "true")
 
     assert readme.read_text() == f"# Demo\n{md_badge(8)}{COMMENT_MARKER}\n"
+
+
+# --source
+
+
+def test_get_parser_source_defaults_to_github():
+    args = get_parser().parse_args(["--repo", REPO])
+    assert args.source == "github"
+    assert args.package is args.ecosystem is args.package_version is None
+
+
+def test_get_parser_rejects_unknown_source_and_ecosystem():
+    with pytest.raises(SystemExit):
+        get_parser().parse_args(["--source", "pypi"])
+    with pytest.raises(SystemExit):
+        get_parser().parse_args(["--source", "deps.dev", "--ecosystem", "go"])
+
+
+@pytest.mark.parametrize(
+    "argv, message",
+    [
+        ([], "--repo is required for --source github"),
+        (["--source", "jenkins"], "--package is required for --source jenkins"),
+        (["--source", "deps.dev"], "--package is required for --source deps.dev"),
+        (
+            ["--source", "deps.dev", "--package", "requests"],
+            "--ecosystem is required for --source deps.dev",
+        ),
+    ],
+)
+def test_main_reports_missing_source_options(mocker, capsys, argv, message):
+    mocker.patch("sys.argv", ["used-by", *argv])
+    read = mocker.patch("used_by.main.get_existing_badge")
+
+    with pytest.raises(SystemExit):
+        main()
+
+    assert message in capsys.readouterr().err
+    read.assert_not_called()
+
+
+def test_main_jenkins_source_writes_badge_linking_to_plugin(
+    tmp_path, monkeypatch, mocker
+):
+    monkeypatch.chdir(tmp_path)
+    (tmp_path / "README.md").write_text("# Demo\n")
+    installs = mocker.patch(
+        "used_by.main.get_jenkins_installs",
+        return_value=(168, "https://plugins.jenkins.io/explain-error/"),
+    )
+    mocker.patch("sys.argv", ["used-by", "--source=jenkins", "--package=explain-error"])
+
+    main()
+
+    installs.assert_called_once_with("explain-error")
+    assert (tmp_path / "README.md").read_text() == (
+        "# Demo\n\n[![Used by](https://img.shields.io/static/v1?label=Used%20by"
+        "&message=168&color=informational&logo=slickpic)]"
+        f"(https://plugins.jenkins.io/explain-error/) {COMMENT_MARKER}"
+    )
+
+
+def test_main_deps_dev_source_updates_rst_badge(tmp_path, monkeypatch, mocker):
+    monkeypatch.chdir(tmp_path)
+    link = "https://deps.dev/pypi/requests/2.32.3/dependents"
+    old = generate_rst_badge("", 2000, "Used by", "informational", "slickpic", link)
+    readme = tmp_path / "README.rst"
+    readme.write_text(f"Demo\n\n{RST_COMMENT_MARKER}\n{old}\n{RST_COMMENT_MARKER}\n")
+    count = mocker.patch("used_by.main.get_deps_dev_count", return_value=(2155, link))
+    mocker.patch(
+        "sys.argv",
+        [
+            "used-by",
+            "--source=deps.dev",
+            "--ecosystem=pypi",
+            "--package=requests",
+            "--package-version=2.32.3",
+            "--file-path=README.rst",
+            "--update-badge=true",
+        ],
+    )
+
+    main()
+
+    count.assert_called_once_with("pypi", "requests", "2.32.3")
+    new = generate_rst_badge("", 2155, "Used by", "informational", "slickpic", link)
+    assert readme.read_text() == (
+        f"Demo\n\n{RST_COMMENT_MARKER}\n{new}\n{RST_COMMENT_MARKER}\n"
+    )
+    assert f":target: {link}" in new

@@ -5,6 +5,13 @@ from urllib.parse import quote
 from bs4 import BeautifulSoup
 from pathlib import Path
 from used_by import COMMENT_MARKER, RST_COMMENT_MARKER
+from used_by.sources import (
+    DEPS_DEV_ECOSYSTEMS,
+    get_deps_dev_count,
+    get_jenkins_installs,
+)
+
+SOURCES = ("github", "deps.dev", "jenkins")
 
 FALSE_VALUES = {"", "0", "f", "false", "n", "no", "off"}
 # A Markdown image link such as [![Used by](<image url>)](<link url>) that is
@@ -35,11 +42,48 @@ def percentage(value: str) -> int:
 def get_parser():
     parser = argparse.ArgumentParser(
         prog="used-by",
-        description="Generate a Used By badge from GitHub dependents information.",
+        description=(
+            "Generate a Used By badge from GitHub dependents, deps.dev "
+            "dependents or Jenkins plugin installations."
+        ),
     )
 
     parser.add_argument(
-        "--repo", help="GitHub repository name (e.g., shenxianpeng/used-by)."
+        "--source",
+        default="github",
+        choices=SOURCES,
+        help=(
+            "Where the count comes from: GitHub dependents of --repo, deps.dev "
+            "dependents of --package in --ecosystem, or Jenkins installations "
+            "of the plugin --package. Defaults to github."
+        ),
+    )
+
+    parser.add_argument(
+        "--repo",
+        help="GitHub repository name (e.g., shenxianpeng/used-by). Required for --source github.",
+    )
+
+    parser.add_argument(
+        "--package",
+        help=(
+            "Package name for --source deps.dev (e.g., requests), or plugin id "
+            "for --source jenkins (e.g., explain-error)."
+        ),
+    )
+
+    parser.add_argument(
+        "--ecosystem",
+        choices=DEPS_DEV_ECOSYSTEMS,
+        help="Package ecosystem for --source deps.dev.",
+    )
+
+    parser.add_argument(
+        "--package-version",
+        help=(
+            "Package version for --source deps.dev, which counts dependents per "
+            "version. Defaults to the version deps.dev marks as default."
+        ),
     )
 
     parser.add_argument(
@@ -79,7 +123,7 @@ def get_parser():
         type=percentage,
         help=(
             "Do not update the badge when the count drops by more than this "
-            "percentage, which usually means GitHub returned bad data. "
+            "percentage, which usually means the source returned bad data. "
             "Use 100 to accept any drop. Defaults to 50."
         ),
     )
@@ -141,17 +185,20 @@ def generate_markdown_badge(
     badge_label,
     badge_color,
     badge_logo,
+    link_url=None,
 ) -> str:
-    badge_content = f"[![{badge_label}]({generate_badge_url(deps_number, badge_label, badge_color, badge_logo)})](https://github.com/{repo_name}/network/dependents)"
+    link_url = link_url or f"https://github.com/{repo_name}/network/dependents"
+    badge_content = f"[![{badge_label}]({generate_badge_url(deps_number, badge_label, badge_color, badge_logo)})]({link_url})"
     return badge_content
 
 
 def generate_rst_badge(
-    repo_name, deps_number, badge_label, badge_color, badge_logo
+    repo_name, deps_number, badge_label, badge_color, badge_logo, link_url=None
 ) -> str:
+    link_url = link_url or f"https://github.com/{repo_name}/network/dependents"
     badge_content = (
         f".. image:: {generate_badge_url(deps_number, badge_label, badge_color, badge_logo)}\n"
-        f"   :target: https://github.com/{repo_name}/network/dependents\n"
+        f"   :target: {link_url}\n"
         f"   :alt: {badge_label}"
     )
     return badge_content
@@ -223,9 +270,32 @@ def print_badge_content(badge_string, flag=False) -> None:
     print("=" * 80 + "\n")
 
 
+def check_source_args(parser, args) -> None:
+    """Stop with a usage error when the chosen source is missing an option."""
+    if args.source == "github":
+        if not args.repo:
+            parser.error("--repo is required for --source github")
+        return
+    if not args.package:
+        parser.error(f"--package is required for --source {args.source}")
+    if args.source == "deps.dev" and not args.ecosystem:
+        parser.error("--ecosystem is required for --source deps.dev")
+
+
+def get_count(args):
+    """Return (count, link) from the source chosen with --source."""
+    if args.source == "jenkins":
+        return get_jenkins_installs(args.package)
+    if args.source == "deps.dev":
+        return get_deps_dev_count(args.ecosystem, args.package, args.package_version)
+    url = f"https://github.com/{args.repo}/network/dependents"
+    return get_dependents_number(url), url
+
+
 def main():
     parser = get_parser()
     args = parser.parse_args()
+    check_source_args(parser, args)
 
     repo_name = args.repo
     file_path = args.file_path
@@ -238,16 +308,15 @@ def main():
     existing_badge = get_existing_badge(file_path)
     print_badge_content(existing_badge, flag=True)
 
-    url = f"https://github.com/{repo_name}/network/dependents"
-    deps_number = get_dependents_number(url)
+    deps_number, link_url = get_count(args)
 
     if "md" == file_type:
         new_badge = generate_markdown_badge(
-            repo_name, deps_number, badge_label, badge_color, badge_logo
+            repo_name, deps_number, badge_label, badge_color, badge_logo, link_url
         )
     elif "rst" == file_type:
         new_badge = generate_rst_badge(
-            repo_name, deps_number, badge_label, badge_color, badge_logo
+            repo_name, deps_number, badge_label, badge_color, badge_logo, link_url
         )
     else:
         print(f"Unsupported file type: .{file_type}. Only .md and .rst are supported.")
