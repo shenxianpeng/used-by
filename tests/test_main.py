@@ -17,6 +17,8 @@ from used_by.main import (
     add_new_badge,
     update_existing_badge,
     print_badge_content,
+    get_badge_count,
+    is_suspicious_drop,
     main,
 )
 from used_by import COMMENT_MARKER, RST_COMMENT_MARKER
@@ -409,9 +411,11 @@ def test_get_repo_number_reads_github_markup():
 
 
 @pytest.mark.parametrize("text", ["Repositories", ""])
-def test_get_repo_number_returns_zero_when_count_is_not_a_number(text):
+def test_get_repo_number_raises_when_count_is_not_a_number(text):
+    # Regression test: an unreadable count used to become 0 and reset the badge.
     soup = BeautifulSoup(f"<a class='btn-link selected'>{text}</a>", "html.parser")
-    assert get_repo_number(soup) == 0
+    with pytest.raises(ValueError, match="Could not read the dependents count"):
+        get_repo_number(soup)
 
 
 def test_get_dependents_number_single_package(fake_github):
@@ -682,3 +686,84 @@ def test_main_leaves_freshly_added_badge_untouched(
 
     write.assert_not_called()
     assert readme.read_text() == added == f"# Demo\n\n{md_badge(3)} {COMMENT_MARKER}"
+
+
+# --max-drop guard
+
+
+def test_get_parser_max_drop_defaults_to_50():
+    assert get_parser().parse_args(["--repo", REPO]).max_drop == 50
+
+
+@pytest.mark.parametrize("value", ["0", "100", "25"])
+def test_get_parser_max_drop_accepts_percentages(value):
+    args = get_parser().parse_args(["--repo", REPO, f"--max-drop={value}"])
+    assert args.max_drop == int(value)
+
+
+@pytest.mark.parametrize("value", ["-1", "101", "half", "12.5"])
+def test_get_parser_max_drop_rejects_invalid_values(value):
+    with pytest.raises(SystemExit):
+        get_parser().parse_args(["--repo", REPO, f"--max-drop={value}"])
+
+
+def test_get_badge_count_reads_markdown_and_rst_badges():
+    assert get_badge_count(md_badge(1234)) == 1234
+    assert get_badge_count(rst_badge(7)) == 7
+    assert get_badge_count("[![x](https://example.com/badge.svg)](https://x)") is None
+
+
+@pytest.mark.parametrize(
+    "old, new, max_drop, expected",
+    [
+        (None, 0, 50, False),  # no previous count to compare with
+        (0, 0, 50, False),
+        (100, 50, 50, False),  # exactly the allowed drop
+        (100, 49, 50, True),
+        (100, 0, 50, True),
+        (100, 0, 100, False),  # 100 accepts any drop
+        (100, 150, 0, False),  # growth is always fine
+        (100, 99, 0, True),
+    ],
+)
+def test_is_suspicious_drop(old, new, max_drop, expected):
+    assert is_suspicious_drop(old, new, max_drop) is expected
+
+
+def test_main_keeps_badge_when_count_drops_too_much(
+    tmp_path, monkeypatch, mocker, fake_github, capsys
+):
+    monkeypatch.chdir(tmp_path)
+    readme = tmp_path / "README.md"
+    original = f"# Demo\n{md_badge(1000)}{COMMENT_MARKER}\n"
+    readme.write_text(original)
+    fake_github.pages[DEPENDENTS_URL] = make_dependents_page(3)
+
+    run_main(mocker, "--update-badge", "true")
+
+    assert readme.read_text() == original
+    assert "::warning::Not updating the badge" in capsys.readouterr().out
+
+
+def test_main_updates_badge_on_large_drop_when_allowed(
+    tmp_path, monkeypatch, mocker, fake_github
+):
+    monkeypatch.chdir(tmp_path)
+    readme = tmp_path / "README.md"
+    readme.write_text(f"# Demo\n{md_badge(1000)}{COMMENT_MARKER}\n")
+    fake_github.pages[DEPENDENTS_URL] = make_dependents_page(3)
+
+    run_main(mocker, "--update-badge", "true", "--max-drop", "100")
+
+    assert readme.read_text() == f"# Demo\n{md_badge(3)}{COMMENT_MARKER}\n"
+
+
+def test_main_updates_badge_on_small_drop(tmp_path, monkeypatch, mocker, fake_github):
+    monkeypatch.chdir(tmp_path)
+    readme = tmp_path / "README.md"
+    readme.write_text(f"# Demo\n{md_badge(10)}{COMMENT_MARKER}\n")
+    fake_github.pages[DEPENDENTS_URL] = make_dependents_page(8)
+
+    run_main(mocker, "--update-badge", "true")
+
+    assert readme.read_text() == f"# Demo\n{md_badge(8)}{COMMENT_MARKER}\n"

@@ -29,6 +29,10 @@ inputs:
     description: Update an existing badge whose count changed ('true' or 'false'); a missing badge is always added. Defaults to 'false'.
     required: false
     default: "false"
+  max-drop:
+    description: Skip the update when the count drops by more than this percentage (0-100), which usually means GitHub returned bad data. Use 100 to accept any drop. Defaults to 50.
+    required: false
+    default: "50"
 
 runs:
   using: "composite"
@@ -44,13 +48,18 @@ runs:
         USED_BY_BADGE_COLOR: ${{ inputs.badge-color }}
         USED_BY_BADGE_LOGO: ${{ inputs.badge-logo }}
         USED_BY_UPDATE_BADGE: ${{ inputs.update-badge }}
+        USED_BY_MAX_DROP: ${{ inputs.max-drop }}
       run: |
         # Keep the virtualenv out of the caller's checkout.
         python3 -m venv "$RUNNER_TEMP/used-by-venv"
         source "$RUNNER_TEMP/used-by-venv/bin/activate"
         # try to fix https://github.com/pypa/setuptools/issues/3269
         python3 -m pip install pip -U
-        pip install -r "$GITHUB_ACTION_PATH/requirements.txt"
+        # Install the used-by code from this same ref of the action, so the
+        # CLI always accepts the options passed below. Build from a copy so
+        # no build files end up in the caller's checkout.
+        cp -R "$GITHUB_ACTION_PATH" "$RUNNER_TEMP/used-by-src"
+        pip install "$RUNNER_TEMP/used-by-src"
 
         used-by \
          --repo="$USED_BY_REPO" \
@@ -58,4 +67,5 @@ runs:
          --badge-label="$USED_BY_BADGE_LABEL" \
          --badge-color="$USED_BY_BADGE_COLOR" \
          --badge-logo="$USED_BY_BADGE_LOGO" \
-         --update-badge="$USED_BY_UPDATE_BADGE"
+         --update-badge="$USED_BY_UPDATE_BADGE" \
+         --max-drop="$USED_BY_MAX_DROP"
