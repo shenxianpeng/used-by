@@ -55,7 +55,11 @@ runs:
         source "$RUNNER_TEMP/used-by-venv/bin/activate"
         # try to fix https://github.com/pypa/setuptools/issues/3269
         python3 -m pip install pip -U
-        pip install -r "$GITHUB_ACTION_PATH/requirements.txt"
+        # Install the used-by code from this same ref of the action, so the
+        # CLI always accepts the options passed below. Build from a copy so
+        # no build files end up in the caller's checkout.
+        cp -R "$GITHUB_ACTION_PATH" "$RUNNER_TEMP/used-by-src"
+        pip install "$RUNNER_TEMP/used-by-src"
 
         used-by \
          --repo="$USED_BY_REPO" \
