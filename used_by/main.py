@@ -10,11 +10,26 @@ FALSE_VALUES = {"", "0", "f", "false", "n", "no", "off"}
 # A Markdown image link such as [![Used by](<image url>)](<link url>) that is
 # followed only by whitespace, i.e. the badge right before the comment marker.
 MD_BADGE_PATTERN = re.compile(r"\[!\[[^\]]*\]\([^)]*\)\]\([^)]*\)(?=\s*$)")
+# The count shown by a badge, e.g. "...&message=42&color=..." -> "42".
+BADGE_COUNT_PATTERN = re.compile(r"[?&]message=(\d+)(?:&|\s|$)")
 
 
 def str_to_bool(value: str) -> bool:
     """Parse a flag value such as an action input ("false" -> False)."""
     return value.strip().lower() not in FALSE_VALUES
+
+
+def percentage(value: str) -> int:
+    """Parse a whole-number percentage between 0 and 100."""
+    try:
+        number = int(value)
+    except ValueError:
+        number = -1
+    if not 0 <= number <= 100:
+        raise argparse.ArgumentTypeError(
+            f"must be a whole number between 0 and 100, got {value!r}"
+        )
+    return number
 
 
 def get_parser():
@@ -58,6 +73,17 @@ def get_parser():
         help="Add or update badge if set. Defaults to False.",
     )
 
+    parser.add_argument(
+        "--max-drop",
+        default=50,
+        type=percentage,
+        help=(
+            "Do not update the badge when the count drops by more than this "
+            "percentage, which usually means GitHub returned bad data. "
+            "Use 100 to accept any drop. Defaults to 50."
+        ),
+    )
+
     return parser
 
 
@@ -80,7 +106,12 @@ def get_repo_number(soup):
         # GitHub renders large counts with thousands separators, e.g. "4,237,401"
         return int(repo_text.split()[0].replace(",", ""))
     except (ValueError, IndexError):
-        return 0
+        # Never turn an unreadable page into a count of 0: that would reset
+        # the badge and open a pull request with the wrong number.
+        raise ValueError(
+            f"Could not read the dependents count from {repo_text!r} on the "
+            "GitHub dependents page; the page layout may have changed."
+        ) from None
 
 
 def get_dependents_number(url: str) -> int:
@@ -147,6 +178,19 @@ def get_existing_badge(file_path) -> str:
         md_badge = MD_BADGE_PATTERN.search(badge)
         return md_badge.group() if md_badge else badge
     return ""
+
+
+def get_badge_count(badge: str):
+    """Return the count shown by a badge, or None if it shows none."""
+    match = BADGE_COUNT_PATTERN.search(badge)
+    return int(match.group(1)) if match else None
+
+
+def is_suspicious_drop(old_count, new_count, max_drop) -> bool:
+    """True when the count fell by more than max_drop percent."""
+    if old_count is None or old_count == 0:
+        return False
+    return (old_count - new_count) * 100 > old_count * max_drop
 
 
 def update_existing_badge(file_path, existing_badge, new_badge) -> None:
@@ -216,6 +260,16 @@ def main():
     if existing_badge == "":
         add_new_badge(file_path, new_badge)
     elif update_badge:
+        old_count = get_badge_count(existing_badge)
+        if is_suspicious_drop(old_count, deps_number, args.max_drop):
+            # Shown as a warning annotation when running in GitHub Actions.
+            print(
+                f"::warning::Not updating the badge: the dependents count dropped "
+                f"from {old_count} to {deps_number}, more than the allowed "
+                f"{args.max_drop}%. If the drop is real, rerun with a higher "
+                "--max-drop (max-drop input), or 100 to accept any drop."
+            )
+            return
         update_existing_badge(file_path, existing_badge, new_badge)
 
 

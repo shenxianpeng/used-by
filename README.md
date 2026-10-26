@@ -64,6 +64,10 @@ Create a new GitHub Actions workflow in your project, e.g. at `.github/workflows
 * Description: Update an existing badge whose count changed ('true' or 'false'); a missing badge is always added. Defaults to false.
 * Default: 'false'
 
+### `max-drop`:
+* Description: Skip the update when the count drops by more than this percentage (0-100), which usually means GitHub returned bad data. A warning is printed instead. Use 100 to accept any drop. Defaults to 50.
+* Default: '50'
+
 For supported values of `badge-label`, `badge-color` and `badge-logo`, see https://shields.io/badges/static-badge
 
 ### Install `used-by` CLI
@@ -76,7 +80,7 @@ pip install git+https://github.com/shenxianpeng/used-by.git@main
 
 ```bash
 used-by --help
-usage: used-by [-h] [--repo REPO] [--file-path FILE_PATH] [--badge-label BADGE_LABEL] [--badge-color BADGE_COLOR] [--badge-logo BADGE_LOGO] [--update-badge UPDATE_BADGE]
+usage: used-by [-h] [--repo REPO] [--file-path FILE_PATH] [--badge-label BADGE_LABEL] [--badge-color BADGE_COLOR] [--badge-logo BADGE_LOGO] [--update-badge UPDATE_BADGE] [--max-drop MAX_DROP]
 
 Generate a Used By badge from GitHub dependents information.
 
@@ -93,6 +97,7 @@ options:
                         The badge display logo. Defaults to slickpic.
   --update-badge UPDATE_BADGE
                         Add or update badge if set. Defaults to False.
+  --max-drop MAX_DROP   Do not update the badge when the count drops by more than this percentage, which usually means GitHub returned bad data. Use 100 to accept any drop. Defaults to 50.
 ```
 
 ### Run `used-by` CLI
