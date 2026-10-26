@@ -61,7 +61,9 @@ def get_deps_dev_count(ecosystem: str, package: str, version=None):
         f"deps.dev has no dependents data for {ecosystem} {package} {version}.",
     )
     count = read_count(data.get("dependentCount"), "deps.dev")
-    link = f"https://deps.dev/{ecosystem}/{_escape(package)}/{_escape(version)}/dependents"
+    link = (
+        f"https://deps.dev/{ecosystem}/{_escape(package)}/{_escape(version)}/dependents"
+    )
     return count, link
 
 
