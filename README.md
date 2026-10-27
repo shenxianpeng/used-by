@@ -5,7 +5,12 @@
 [![pre-commit](https://github.com/shenxianpeng/used-by/actions/workflows/pre-commit.yml/badge.svg)](https://github.com/shenxianpeng/used-by/actions/workflows/pre-commit.yml)
 [![codecov](https://codecov.io/github/shenxianpeng/used-by/graph/badge.svg?token=QDO4MCI87B)](https://codecov.io/github/shenxianpeng/used-by)
 
-Create and update Used By badge by leveraging GitHub's dependencies information via a pull request.
+Create and update a Used By badge via a pull request. The badge counts dependents (projects that depend on yours) from one of these sources:
+
+| `source` | What is counted | Badge links to |
+|---|---|---|
+| `github` (default) | Repositories that depend on a GitHub repository ([dependency graph](https://docs.github.com/en/code-security/supply-chain-security/understanding-your-software-supply-chain/about-the-dependency-graph)) | `github.com/<repo>/network/dependents` |
+| `deps.dev` | Packages that depend on an npm, PyPI, Maven or Cargo package, according to [deps.dev](https://deps.dev) | the deps.dev dependents page |
 
 ## Usage
 
@@ -36,13 +41,44 @@ Create a new GitHub Actions workflow in your project, e.g. at `.github/workflows
 > [!IMPORTANT]
 > To create pull request with `peter-evans/create-pull-request@v8` requires changing [Workflow permissions](https://github.com/peter-evans/create-pull-request?tab=readme-ov-file#workflow-permissions) to **Read and write permissions** and enabling  **Allow GitHub Actions to create and approve pull requests**.
 
-## Required Inputs
+### Count from deps.dev
+
+Set `source`, `ecosystem` and `package` instead of `repo`:
+
+```yaml
+      # Packages depending on a PyPI package
+      - uses: shenxianpeng/used-by@main
+        with:
+          source: deps.dev
+          ecosystem: pypi # npm, pypi, maven or cargo
+          package: requests
+          update-badge: 'true'
+```
+
+> [!NOTE]
+> deps.dev counts dependents **per version**. The version deps.dev marks as default (usually the latest release) is used unless `package-version` is set, so the count can dip right after a release until deps.dev has indexed it; `max-drop` keeps the old number when that happens.
+
+## Inputs
+
+### `source`:
+* Description: Where the count comes from: `github` or `deps.dev`.
+* Default: 'github'
 
 ### `repo`:
-* Description: GitHub repository name. e.g. shenxianpeng/used-by. Defaults to shenxianpeng/used-by.
+* Description: GitHub repository name. e.g. shenxianpeng/used-by. Used with source `github`.
 * Default: 'shenxianpeng/used-by'
 
-## Optional Inputs
+### `package`:
+* Description: Package name for source `deps.dev` (e.g. `requests`, `@types/node`, `org.apache.commons:commons-lang3`).
+* Default: ''
+
+### `ecosystem`:
+* Description: Package ecosystem for source `deps.dev`: `npm`, `pypi`, `maven` or `cargo`.
+* Default: ''
+
+### `package-version`:
+* Description: Package version for source `deps.dev`. Defaults to the version deps.dev marks as default.
+* Default: ''
 
 ### `file-path`:
 * Description: The path to file. Defaults to README.md.
@@ -65,7 +101,7 @@ Create a new GitHub Actions workflow in your project, e.g. at `.github/workflows
 * Default: 'false'
 
 ### `max-drop`:
-* Description: Skip the update when the count drops by more than this percentage (0-100), which usually means GitHub returned bad data. A warning is printed instead. Use 100 to accept any drop. Defaults to 50.
+* Description: Skip the update when the count drops by more than this percentage (0-100), which usually means the source returned bad data. A warning is printed instead. Use 100 to accept any drop. Defaults to 50.
 * Default: '50'
 
 For supported values of `badge-label`, `badge-color` and `badge-logo`, see https://shields.io/badges/static-badge
@@ -73,22 +109,40 @@ For supported values of `badge-label`, `badge-color` and `badge-logo`, see https
 ### Install `used-by` CLI
 
 ```bash
-pip install git+https://github.com/shenxianpeng/used-by.git@main
+pip install used-by
 ```
 
 ### Help of `used-by` CLI
 
 ```bash
 used-by --help
-usage: used-by [-h] [--repo REPO] [--file-path FILE_PATH] [--badge-label BADGE_LABEL] [--badge-color BADGE_COLOR] [--badge-logo BADGE_LOGO] [--update-badge UPDATE_BADGE] [--max-drop MAX_DROP]
+usage: used-by [-h] [--source {github,deps.dev}] [--repo REPO]
+               [--package PACKAGE] [--ecosystem {npm,pypi,maven,cargo}]
+               [--package-version PACKAGE_VERSION] [--file-path FILE_PATH]
+               [--badge-label BADGE_LABEL] [--badge-color BADGE_COLOR]
+               [--badge-logo BADGE_LOGO] [--update-badge UPDATE_BADGE]
+               [--max-drop MAX_DROP]
 
-Generate a Used By badge from GitHub dependents information.
+Generate a Used By badge from GitHub dependents or deps.dev dependents.
 
 options:
   -h, --help            show this help message and exit
+  --source {github,deps.dev}
+                        Where the count comes from: GitHub dependents of
+                        --repo, or deps.dev dependents of --package in
+                        --ecosystem. Defaults to github.
   --repo REPO           GitHub repository name (e.g., shenxianpeng/used-by).
+                        Required for --source github.
+  --package PACKAGE     Package name for --source deps.dev (e.g., requests).
+  --ecosystem {npm,pypi,maven,cargo}
+                        Package ecosystem for --source deps.dev.
+  --package-version PACKAGE_VERSION
+                        Package version for --source deps.dev, which counts
+                        dependents per version. Defaults to the version
+                        deps.dev marks as default.
   --file-path FILE_PATH
-                        The path to the file where the badge will be added. Defaults to README.md.
+                        The path to the file where the badge will be added.
+                        Defaults to README.md.
   --badge-label BADGE_LABEL
                         The badge display name. Defaults to Used by.
   --badge-color BADGE_COLOR
@@ -97,14 +151,20 @@ options:
                         The badge display logo. Defaults to slickpic.
   --update-badge UPDATE_BADGE
                         Add or update badge if set. Defaults to False.
-  --max-drop MAX_DROP   Do not update the badge when the count drops by more than this percentage, which usually means GitHub returned bad data. Use 100 to accept any drop. Defaults to 50.
+  --max-drop MAX_DROP   Do not update the badge when the count drops by more
+                        than this percentage, which usually means the source
+                        returned bad data. Use 100 to accept any drop.
+                        Defaults to 50.
 ```
 
 ### Run `used-by` CLI
 
 ```bash
-# generate markdown makeup text by default
+# GitHub dependents of a repository (the default source)
 $ used-by --repo shenxianpeng/used-by
+
+# Packages that depend on an npm package, according to deps.dev
+$ used-by --source deps.dev --ecosystem npm --package @types/node
 ```
 
 ## Add Used By badge in README
