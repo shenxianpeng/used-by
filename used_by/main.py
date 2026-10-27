@@ -8,10 +8,9 @@ from used_by import COMMENT_MARKER, RST_COMMENT_MARKER
 from used_by.sources import (
     DEPS_DEV_ECOSYSTEMS,
     get_deps_dev_count,
-    get_jenkins_installs,
 )
 
-SOURCES = ("github", "deps.dev", "jenkins")
+SOURCES = ("github", "deps.dev")
 
 FALSE_VALUES = {"", "0", "f", "false", "n", "no", "off"}
 # A Markdown image link such as [![Used by](<image url>)](<link url>) that is
@@ -43,8 +42,7 @@ def get_parser():
     parser = argparse.ArgumentParser(
         prog="used-by",
         description=(
-            "Generate a Used By badge from GitHub dependents, deps.dev "
-            "dependents or Jenkins plugin installations."
+            "Generate a Used By badge from GitHub dependents or deps.dev " "dependents."
         ),
     )
 
@@ -53,9 +51,8 @@ def get_parser():
         default="github",
         choices=SOURCES,
         help=(
-            "Where the count comes from: GitHub dependents of --repo, deps.dev "
-            "dependents of --package in --ecosystem, or Jenkins installations "
-            "of the plugin --package. Defaults to github."
+            "Where the count comes from: GitHub dependents of --repo, or "
+            "deps.dev dependents of --package in --ecosystem. Defaults to github."
         ),
     )
 
@@ -66,10 +63,7 @@ def get_parser():
 
     parser.add_argument(
         "--package",
-        help=(
-            "Package name for --source deps.dev (e.g., requests), or plugin id "
-            "for --source jenkins (e.g., explain-error)."
-        ),
+        help="Package name for --source deps.dev (e.g., requests).",
     )
 
     parser.add_argument(
@@ -277,15 +271,13 @@ def check_source_args(parser, args) -> None:
             parser.error("--repo is required for --source github")
         return
     if not args.package:
-        parser.error(f"--package is required for --source {args.source}")
-    if args.source == "deps.dev" and not args.ecosystem:
+        parser.error("--package is required for --source deps.dev")
+    if not args.ecosystem:
         parser.error("--ecosystem is required for --source deps.dev")
 
 
 def get_count(args):
     """Return (count, link) from the source chosen with --source."""
-    if args.source == "jenkins":
-        return get_jenkins_installs(args.package)
     if args.source == "deps.dev":
         return get_deps_dev_count(args.ecosystem, args.package, args.package_version)
     url = f"https://github.com/{args.repo}/network/dependents"

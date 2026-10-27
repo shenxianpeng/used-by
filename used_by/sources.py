@@ -1,4 +1,4 @@
-"""Usage counts from sources other than GitHub's dependents page.
+"""Dependents counts from sources other than GitHub's dependents page.
 
 Each function returns ``(count, link)``: the number to show on the badge and
 the page the badge should link to.
@@ -10,7 +10,6 @@ import requests
 
 DEPS_DEV_ECOSYSTEMS = ("npm", "pypi", "maven", "cargo")
 DEPS_DEV_API = "https://api.deps.dev"
-JENKINS_PLUGIN_API = "https://plugins.jenkins.io/api/plugin"
 
 
 def _escape(value: str) -> str:
@@ -65,14 +64,3 @@ def get_deps_dev_count(ecosystem: str, package: str, version=None):
         f"https://deps.dev/{ecosystem}/{_escape(package)}/{_escape(version)}/dependents"
     )
     return count, link
-
-
-def get_jenkins_installs(plugin: str):
-    """Current installations of a Jenkins plugin, as shown on plugins.jenkins.io."""
-    data = get_json(
-        f"{JENKINS_PLUGIN_API}/{_escape(plugin)}",
-        f"plugins.jenkins.io has no plugin with the id {plugin!r}.",
-    )
-    stats = data.get("stats") or {}
-    count = read_count(stats.get("currentInstalls"), "plugins.jenkins.io")
-    return count, f"https://plugins.jenkins.io/{_escape(plugin)}/"

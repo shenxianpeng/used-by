@@ -1,12 +1,12 @@
 name: Used By Action
-description: Generate a Used By badge from GitHub dependents, deps.dev dependents or Jenkins plugin installations.
+description: Generate a Used By badge from GitHub dependents or deps.dev dependents.
 author: shenxianpeng
 branding:
   icon: "thumbs-up"
   color: "green"
 inputs:
   source:
-    description: "Where the count comes from: 'github' (dependents of repo), 'deps.dev' (dependents of package in ecosystem) or 'jenkins' (installations of the plugin package). Defaults to 'github'."
+    description: "Where the count comes from: 'github' (dependents of repo) or 'deps.dev' (dependents of package in ecosystem). Defaults to 'github'."
     required: false
     default: 'github'
   repo:
@@ -14,7 +14,7 @@ inputs:
     required: false
     default: 'shenxianpeng/used-by'
   package:
-    description: Package name for source 'deps.dev' (e.g. requests), or plugin id for source 'jenkins' (e.g. explain-error).
+    description: Package name for source 'deps.dev' (e.g. requests).
     required: false
     default: ''
   ecosystem:

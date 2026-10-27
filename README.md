@@ -5,13 +5,12 @@
 [![pre-commit](https://github.com/shenxianpeng/used-by/actions/workflows/pre-commit.yml/badge.svg)](https://github.com/shenxianpeng/used-by/actions/workflows/pre-commit.yml)
 [![codecov](https://codecov.io/github/shenxianpeng/used-by/graph/badge.svg?token=QDO4MCI87B)](https://codecov.io/github/shenxianpeng/used-by)
 
-Create and update a Used By badge via a pull request, counted from one of these sources:
+Create and update a Used By badge via a pull request. The badge counts dependents (projects that depend on yours) from one of these sources:
 
 | `source` | What is counted | Badge links to |
 |---|---|---|
 | `github` (default) | Repositories that depend on a GitHub repository ([dependency graph](https://docs.github.com/en/code-security/supply-chain-security/understanding-your-software-supply-chain/about-the-dependency-graph)) | `github.com/<repo>/network/dependents` |
 | `deps.dev` | Packages that depend on an npm, PyPI, Maven or Cargo package, according to [deps.dev](https://deps.dev) | the deps.dev dependents page |
-| `jenkins` | Jenkins controllers that have a plugin installed, according to [plugins.jenkins.io](https://plugins.jenkins.io) | the plugin page |
 
 ## Usage
 
@@ -42,19 +41,11 @@ Create a new GitHub Actions workflow in your project, e.g. at `.github/workflows
 > [!IMPORTANT]
 > To create pull request with `peter-evans/create-pull-request@v8` requires changing [Workflow permissions](https://github.com/peter-evans/create-pull-request?tab=readme-ov-file#workflow-permissions) to **Read and write permissions** and enabling  **Allow GitHub Actions to create and approve pull requests**.
 
-### Count from deps.dev or Jenkins
+### Count from deps.dev
 
-Set `source` and `package` (plus `ecosystem` for deps.dev) instead of `repo`:
+Set `source`, `ecosystem` and `package` instead of `repo`:
 
 ```yaml
-      # Jenkins plugin installations
-      - uses: shenxianpeng/used-by@main
-        with:
-          source: jenkins
-          package: explain-error # plugin id
-          badge-label: Installs
-          update-badge: 'true'
-
       # Packages depending on a PyPI package
       - uses: shenxianpeng/used-by@main
         with:
@@ -65,13 +56,12 @@ Set `source` and `package` (plus `ecosystem` for deps.dev) instead of `repo`:
 ```
 
 > [!NOTE]
-> - deps.dev counts dependents **per version**. The version deps.dev marks as default (usually the latest release) is used unless `package-version` is set, so the count can dip right after a release until deps.dev has indexed it; `max-drop` keeps the old number when that happens.
-> - Jenkins installation counts come from the monthly Jenkins usage statistics, so they change at most once a month.
+> deps.dev counts dependents **per version**. The version deps.dev marks as default (usually the latest release) is used unless `package-version` is set, so the count can dip right after a release until deps.dev has indexed it; `max-drop` keeps the old number when that happens.
 
 ## Inputs
 
 ### `source`:
-* Description: Where the count comes from: `github`, `deps.dev` or `jenkins`.
+* Description: Where the count comes from: `github` or `deps.dev`.
 * Default: 'github'
 
 ### `repo`:
@@ -79,7 +69,7 @@ Set `source` and `package` (plus `ecosystem` for deps.dev) instead of `repo`:
 * Default: 'shenxianpeng/used-by'
 
 ### `package`:
-* Description: Package name for source `deps.dev` (e.g. `requests`, `@types/node`, `org.apache.commons:commons-lang3`), or plugin id for source `jenkins` (e.g. `explain-error`).
+* Description: Package name for source `deps.dev` (e.g. `requests`, `@types/node`, `org.apache.commons:commons-lang3`).
 * Default: ''
 
 ### `ecosystem`:
@@ -126,28 +116,24 @@ pip install used-by
 
 ```bash
 used-by --help
-usage: used-by [-h] [--source {github,deps.dev,jenkins}] [--repo REPO]
+usage: used-by [-h] [--source {github,deps.dev}] [--repo REPO]
                [--package PACKAGE] [--ecosystem {npm,pypi,maven,cargo}]
                [--package-version PACKAGE_VERSION] [--file-path FILE_PATH]
                [--badge-label BADGE_LABEL] [--badge-color BADGE_COLOR]
                [--badge-logo BADGE_LOGO] [--update-badge UPDATE_BADGE]
                [--max-drop MAX_DROP]
 
-Generate a Used By badge from GitHub dependents, deps.dev dependents or
-Jenkins plugin installations.
+Generate a Used By badge from GitHub dependents or deps.dev dependents.
 
 options:
   -h, --help            show this help message and exit
-  --source {github,deps.dev,jenkins}
+  --source {github,deps.dev}
                         Where the count comes from: GitHub dependents of
-                        --repo, deps.dev dependents of --package in
-                        --ecosystem, or Jenkins installations of the plugin
-                        --package. Defaults to github.
+                        --repo, or deps.dev dependents of --package in
+                        --ecosystem. Defaults to github.
   --repo REPO           GitHub repository name (e.g., shenxianpeng/used-by).
                         Required for --source github.
-  --package PACKAGE     Package name for --source deps.dev (e.g., requests),
-                        or plugin id for --source jenkins (e.g., explain-
-                        error).
+  --package PACKAGE     Package name for --source deps.dev (e.g., requests).
   --ecosystem {npm,pypi,maven,cargo}
                         Package ecosystem for --source deps.dev.
   --package-version PACKAGE_VERSION
@@ -176,9 +162,6 @@ options:
 ```bash
 # GitHub dependents of a repository (the default source)
 $ used-by --repo shenxianpeng/used-by
-
-# Jenkins plugin installations
-$ used-by --source jenkins --package explain-error
 
 # Packages that depend on an npm package, according to deps.dev
 $ used-by --source deps.dev --ecosystem npm --package @types/node

@@ -789,7 +789,6 @@ def test_get_parser_rejects_unknown_source_and_ecosystem():
     "argv, message",
     [
         ([], "--repo is required for --source github"),
-        (["--source", "jenkins"], "--package is required for --source jenkins"),
         (["--source", "deps.dev"], "--package is required for --source deps.dev"),
         (
             ["--source", "deps.dev", "--package", "requests"],
@@ -808,24 +807,24 @@ def test_main_reports_missing_source_options(mocker, capsys, argv, message):
     read.assert_not_called()
 
 
-def test_main_jenkins_source_writes_badge_linking_to_plugin(
+def test_main_deps_dev_source_writes_badge_linking_to_deps_dev(
     tmp_path, monkeypatch, mocker
 ):
     monkeypatch.chdir(tmp_path)
     (tmp_path / "README.md").write_text("# Demo\n")
-    installs = mocker.patch(
-        "used_by.main.get_jenkins_installs",
-        return_value=(168, "https://plugins.jenkins.io/explain-error/"),
+    link = "https://deps.dev/npm/%40types%2Fnode/26.6.5/dependents"
+    count = mocker.patch("used_by.main.get_deps_dev_count", return_value=(406323, link))
+    mocker.patch(
+        "sys.argv",
+        ["used-by", "--source=deps.dev", "--ecosystem=npm", "--package=@types/node"],
     )
-    mocker.patch("sys.argv", ["used-by", "--source=jenkins", "--package=explain-error"])
 
     main()
 
-    installs.assert_called_once_with("explain-error")
+    count.assert_called_once_with("npm", "@types/node", None)
     assert (tmp_path / "README.md").read_text() == (
         "# Demo\n\n[![Used by](https://img.shields.io/static/v1?label=Used%20by"
-        "&message=168&color=informational&logo=slickpic)]"
-        f"(https://plugins.jenkins.io/explain-error/) {COMMENT_MARKER}"
+        f"&message=406323&color=informational&logo=slickpic)]({link}) {COMMENT_MARKER}"
     )
 
 

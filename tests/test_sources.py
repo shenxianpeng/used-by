@@ -4,12 +4,10 @@ import requests
 from used_by.sources import (
     get_deps_dev_count,
     get_deps_dev_default_version,
-    get_jenkins_installs,
     read_count,
 )
 
 DEPS_DEV = "https://api.deps.dev"
-JENKINS = "https://plugins.jenkins.io/api/plugin"
 
 
 @pytest.fixture
@@ -126,29 +124,3 @@ def test_deps_dev_server_error_is_raised(fake_api):
     fake_api.responses[f"{DEPS_DEV}/v3/systems/pypi/packages/requests"] = (500, None)
     with pytest.raises(requests.HTTPError):
         get_deps_dev_count("pypi", "requests")
-
-
-# Jenkins
-
-
-def test_jenkins_installs(fake_api):
-    fake_api.responses[f"{JENKINS}/explain-error"] = (
-        200,
-        {"name": "explain-error", "stats": {"currentInstalls": 168}},
-    )
-    assert get_jenkins_installs("explain-error") == (
-        168,
-        "https://plugins.jenkins.io/explain-error/",
-    )
-
-
-def test_jenkins_unknown_plugin(fake_api):
-    with pytest.raises(ValueError, match="no plugin with the id 'nope'"):
-        get_jenkins_installs("nope")
-
-
-@pytest.mark.parametrize("payload", [{}, {"stats": None}, {"stats": {}}])
-def test_jenkins_missing_stats_is_an_error(fake_api, payload):
-    fake_api.responses[f"{JENKINS}/explain-error"] = (200, payload)
-    with pytest.raises(ValueError, match="from plugins.jenkins.io"):
-        get_jenkins_installs("explain-error")
