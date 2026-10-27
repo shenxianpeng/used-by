@@ -351,11 +351,11 @@ def fake_github(mocker):
 
 
 def md_badge(count, repo=REPO):
-    return generate_markdown_badge(repo, count, "Used by", "informational", "github")
+    return generate_markdown_badge(repo, count, "Used by", "informational", "slickpic")
 
 
 def rst_badge(count, repo=REPO):
-    return generate_rst_badge(repo, count, "Used by", "informational", "github")
+    return generate_rst_badge(repo, count, "Used by", "informational", "slickpic")
 
 
 def run_main(mocker, *args):
@@ -372,7 +372,7 @@ def test_get_parser_defaults():
     assert args.file_path == "README.md"
     assert args.badge_label == "Used by"
     assert args.badge_color == "informational"
-    assert args.badge_logo == "github"
+    assert args.badge_logo == "slickpic"
     assert args.update_badge is False
 
 
@@ -803,7 +803,7 @@ def test_format_count_full():
     [("1k", 1000), ("1.2k", 1200), ("4.3M", 4300000), ("1.2B", 1200000000)],
 )
 def test_get_badge_count_reads_short_counts(shown, count):
-    badge = generate_markdown_badge(REPO, shown, "Used by", "informational", "github")
+    badge = generate_markdown_badge(REPO, shown, "Used by", "informational", "slickpic")
     assert get_badge_count(badge) == count
 
 
@@ -815,9 +815,7 @@ def test_get_parser_number_format():
         get_parser().parse_args(["--repo", REPO, "--number-format=long"])
 
 
-def test_main_writes_short_count_with_github_logo(
-    tmp_path, monkeypatch, mocker, fake_github
-):
+def test_main_writes_short_count(tmp_path, monkeypatch, mocker, fake_github):
     monkeypatch.chdir(tmp_path)
     readme = tmp_path / "README.md"
     readme.write_text("# Demo\n")
@@ -826,7 +824,7 @@ def test_main_writes_short_count_with_github_logo(
     run_main(mocker)
 
     assert readme.read_text() == f"# Demo\n\n{md_badge('4.3M')} {COMMENT_MARKER}"
-    assert "message=4.3M&color=informational&logo=github" in readme.read_text()
+    assert "message=4.3M&color=informational&logo=slickpic" in readme.read_text()
 
 
 def test_main_full_number_format(tmp_path, monkeypatch, mocker, fake_github):

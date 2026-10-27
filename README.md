@@ -1,6 +1,6 @@
 # Used By
 
-[![Used by](https://img.shields.io/static/v1?label=Used%20by&message=10&color=informational&logo=github)](https://github.com/shenxianpeng/used-by/network/dependents)<!-- used by badge -->
+[![Used by](https://img.shields.io/static/v1?label=Used%20by&message=10&color=informational&logo=slickpic)](https://github.com/shenxianpeng/used-by/network/dependents)<!-- used by badge -->
 [![main](https://github.com/shenxianpeng/used-by/actions/workflows/main.yml/badge.svg)](https://github.com/shenxianpeng/used-by/actions/workflows/main.yml)
 [![pre-commit](https://github.com/shenxianpeng/used-by/actions/workflows/pre-commit.yml/badge.svg)](https://github.com/shenxianpeng/used-by/actions/workflows/pre-commit.yml)
 [![codecov](https://codecov.io/github/shenxianpeng/used-by/graph/badge.svg?token=QDO4MCI87B)](https://codecov.io/github/shenxianpeng/used-by)
@@ -57,8 +57,8 @@ Create a new GitHub Actions workflow in your project, e.g. at `.github/workflows
 * Default: 'informational'
 
 ### `badge-logo`:
-* Description: The badge display logo. Defaults to github.
-* Default: 'github'
+* Description: The badge display logo. Defaults to slickpic.
+* Default: 'slickpic'
 
 ### `number-format`:
 * Description: How the count is shown: `short` (1.2k, 4.3M) or `full` (1234, 4300000). Short counts are rounded down, so the badge never shows more than the real count. Defaults to short.
@@ -102,7 +102,7 @@ options:
   --badge-color BADGE_COLOR
                         The badge display color. Defaults to informational.
   --badge-logo BADGE_LOGO
-                        The badge display logo. Defaults to github.
+                        The badge display logo. Defaults to slickpic.
   --number-format {short,full}
                         How the count is shown: short (1.2k, 4.3M) or full
                         (1234, 4300000). Defaults to short.
@@ -125,18 +125,18 @@ $ used-by --repo shenxianpeng/used-by
 
 Copy following content to show Used By badge in your repository README.
 
-[![Used by](https://img.shields.io/static/v1?label=Used%20by&message=10&color=informational&logo=github)](https://github.com/shenxianpeng/used-by/network/dependents)<!-- used by badge -->
+[![Used by](https://img.shields.io/static/v1?label=Used%20by&message=10&color=informational&logo=slickpic)](https://github.com/shenxianpeng/used-by/network/dependents)<!-- used by badge -->
 
 **Markdown**
 
 ```
-[![Used by](https://img.shields.io/static/v1?label=Used%20by&message=10&color=informational&logo=github)](https://github.com/shenxianpeng/used-by/network/dependents)<!-- used by badge -->
+[![Used by](https://img.shields.io/static/v1?label=Used%20by&message=10&color=informational&logo=slickpic)](https://github.com/shenxianpeng/used-by/network/dependents)<!-- used by badge -->
 ```
 
 **reStructuredText**
 
 ```
-.. image:: https://img.shields.io/static/v1?label=Used%20by&message=0&color=informational&logo=github
+.. image:: https://img.shields.io/static/v1?label=Used%20by&message=0&color=informational&logo=slickpic
     :target: https://github.com/shenxianpeng/used-by/network/dependents
     :alt: used-by
 ```

@@ -65,8 +65,8 @@ def get_parser():
 
     parser.add_argument(
         "--badge-logo",
-        default="github",
-        help="The badge display logo. Defaults to github.",
+        default="slickpic",
+        help="The badge display logo. Defaults to slickpic.",
     )
 
     parser.add_argument(

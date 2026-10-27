@@ -22,9 +22,9 @@ inputs:
     required: false
     default: 'informational'
   badge-logo:
-    description: The badge display logo. Defaults to 'github'.
+    description: The badge display logo. Defaults to 'slickpic'.
     required: false
-    default: "github"
+    default: "slickpic"
   number-format:
     description: "How the count is shown: 'short' (1.2k, 4.3M) or 'full' (1234, 4300000). Defaults to 'short'."
     required: false
