@@ -25,6 +25,10 @@ inputs:
     description: The badge display logo. Defaults to 'slickpic'.
     required: false
     default: "slickpic"
+  number-format:
+    description: "How the count is shown: 'short' (1.2k, 4.3M) or 'full' (1234, 4300000). Defaults to 'short'."
+    required: false
+    default: "short"
   update-badge:
     description: Update an existing badge whose count changed ('true' or 'false'); a missing badge is always added. Defaults to 'false'.
     required: false
@@ -47,6 +51,7 @@ runs:
         USED_BY_BADGE_LABEL: ${{ inputs.badge-label }}
         USED_BY_BADGE_COLOR: ${{ inputs.badge-color }}
         USED_BY_BADGE_LOGO: ${{ inputs.badge-logo }}
+        USED_BY_NUMBER_FORMAT: ${{ inputs.number-format }}
         USED_BY_UPDATE_BADGE: ${{ inputs.update-badge }}
         USED_BY_MAX_DROP: ${{ inputs.max-drop }}
       run: |
@@ -67,5 +72,6 @@ runs:
          --badge-label="$USED_BY_BADGE_LABEL" \
          --badge-color="$USED_BY_BADGE_COLOR" \
          --badge-logo="$USED_BY_BADGE_LOGO" \
+         --number-format="$USED_BY_NUMBER_FORMAT" \
          --update-badge="$USED_BY_UPDATE_BADGE" \
          --max-drop="$USED_BY_MAX_DROP"

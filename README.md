@@ -60,6 +60,10 @@ Create a new GitHub Actions workflow in your project, e.g. at `.github/workflows
 * Description: The badge display logo. Defaults to slickpic.
 * Default: 'slickpic'
 
+### `number-format`:
+* Description: How the count is shown: `short` (1.2k, 4.3M) or `full` (1234, 4300000). Short counts are rounded down, so the badge never shows more than the real count. Defaults to short.
+* Default: 'short'
+
 ### `update-badge`:
 * Description: Update an existing badge whose count changed ('true' or 'false'); a missing badge is always added. Defaults to false.
 * Default: 'false'
@@ -80,7 +84,10 @@ pip install git+https://github.com/shenxianpeng/used-by.git@main
 
 ```bash
 used-by --help
-usage: used-by [-h] [--repo REPO] [--file-path FILE_PATH] [--badge-label BADGE_LABEL] [--badge-color BADGE_COLOR] [--badge-logo BADGE_LOGO] [--update-badge UPDATE_BADGE] [--max-drop MAX_DROP]
+usage: used-by [-h] [--repo REPO] [--file-path FILE_PATH]
+               [--badge-label BADGE_LABEL] [--badge-color BADGE_COLOR]
+               [--badge-logo BADGE_LOGO] [--number-format {short,full}]
+               [--update-badge UPDATE_BADGE] [--max-drop MAX_DROP]
 
 Generate a Used By badge from GitHub dependents information.
 
@@ -88,16 +95,23 @@ options:
   -h, --help            show this help message and exit
   --repo REPO           GitHub repository name (e.g., shenxianpeng/used-by).
   --file-path FILE_PATH
-                        The path to the file where the badge will be added. Defaults to README.md.
+                        The path to the file where the badge will be added.
+                        Defaults to README.md.
   --badge-label BADGE_LABEL
                         The badge display name. Defaults to Used by.
   --badge-color BADGE_COLOR
                         The badge display color. Defaults to informational.
   --badge-logo BADGE_LOGO
                         The badge display logo. Defaults to slickpic.
+  --number-format {short,full}
+                        How the count is shown: short (1.2k, 4.3M) or full
+                        (1234, 4300000). Defaults to short.
   --update-badge UPDATE_BADGE
                         Add or update badge if set. Defaults to False.
-  --max-drop MAX_DROP   Do not update the badge when the count drops by more than this percentage, which usually means GitHub returned bad data. Use 100 to accept any drop. Defaults to 50.
+  --max-drop MAX_DROP   Do not update the badge when the count drops by more
+                        than this percentage, which usually means GitHub
+                        returned bad data. Use 100 to accept any drop.
+                        Defaults to 50.
 ```
 
 ### Run `used-by` CLI
