@@ -10,8 +10,11 @@ FALSE_VALUES = {"", "0", "f", "false", "n", "no", "off"}
 # A Markdown image link such as [![Used by](<image url>)](<link url>) that is
 # followed only by whitespace, i.e. the badge right before the comment marker.
 MD_BADGE_PATTERN = re.compile(r"\[!\[[^\]]*\]\([^)]*\)\]\([^)]*\)(?=\s*$)")
-# The count shown by a badge, e.g. "...&message=42&color=..." -> "42".
-BADGE_COUNT_PATTERN = re.compile(r"[?&]message=(\d+)(?:&|\s|$)")
+# The count shown by a badge, e.g. "...&message=42&color=..." -> "42", or a
+# short count such as "1.2k" or "4.3M".
+BADGE_COUNT_PATTERN = re.compile(r"[?&]message=(\d+(?:\.\d)?)([kMB]?)(?:&|\s|$)")
+# Units for short counts, largest first.
+COUNT_UNITS = ((1_000_000_000, "B"), (1_000_000, "M"), (1_000, "k"))
 
 
 def str_to_bool(value: str) -> bool:
@@ -62,8 +65,18 @@ def get_parser():
 
     parser.add_argument(
         "--badge-logo",
-        default="slickpic",
-        help="The badge display logo. Defaults to slickpic.",
+        default="github",
+        help="The badge display logo. Defaults to github.",
+    )
+
+    parser.add_argument(
+        "--number-format",
+        default="short",
+        choices=("short", "full"),
+        help=(
+            "How the count is shown: short (1.2k, 4.3M) or full (1234, 4300000). "
+            "Defaults to short."
+        ),
     )
 
     parser.add_argument(
@@ -130,6 +143,24 @@ def get_dependents_number(url: str) -> int:
     return total_number
 
 
+def format_count(count: int, number_format: str = "short") -> str:
+    """Show a count as "1.2k", "12k" or "4.3M", or in full.
+
+    Short counts are rounded down, so the badge never shows more than the real
+    count (1,999 is "1.9k", not "2k").
+    """
+    if number_format == "full":
+        return str(count)
+    for size, unit in COUNT_UNITS:
+        if count >= size:
+            tenths = count * 10 // size
+            if tenths < 100:  # below 10 units: keep one decimal, e.g. "1.2k"
+                whole, decimal = divmod(tenths, 10)
+                return f"{whole}.{decimal}{unit}" if decimal else f"{whole}{unit}"
+            return f"{count // size}{unit}"
+    return str(count)
+
+
 def generate_badge_url(deps_number, badge_label, badge_color, badge_logo) -> str:
     label = quote(badge_label)
     return f"https://img.shields.io/static/v1?label={label}&message={deps_number}&color={badge_color}&logo={badge_logo}"
@@ -183,7 +214,11 @@ def get_existing_badge(file_path) -> str:
 def get_badge_count(badge: str):
     """Return the count shown by a badge, or None if it shows none."""
     match = BADGE_COUNT_PATTERN.search(badge)
-    return int(match.group(1)) if match else None
+    if not match:
+        return None
+    number, unit = match.groups()
+    size = {u: s for s, u in COUNT_UNITS}.get(unit, 1)
+    return round(float(number) * size)
 
 
 def is_suspicious_drop(old_count, new_count, max_drop) -> bool:
@@ -240,14 +275,15 @@ def main():
 
     url = f"https://github.com/{repo_name}/network/dependents"
     deps_number = get_dependents_number(url)
+    shown_number = format_count(deps_number, args.number_format)
 
     if "md" == file_type:
         new_badge = generate_markdown_badge(
-            repo_name, deps_number, badge_label, badge_color, badge_logo
+            repo_name, shown_number, badge_label, badge_color, badge_logo
         )
     elif "rst" == file_type:
         new_badge = generate_rst_badge(
-            repo_name, deps_number, badge_label, badge_color, badge_logo
+            repo_name, shown_number, badge_label, badge_color, badge_logo
         )
     else:
         print(f"Unsupported file type: .{file_type}. Only .md and .rst are supported.")

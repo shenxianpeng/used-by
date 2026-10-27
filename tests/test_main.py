@@ -18,6 +18,7 @@ from used_by.main import (
     update_existing_badge,
     print_badge_content,
     get_badge_count,
+    format_count,
     is_suspicious_drop,
     main,
 )
@@ -350,11 +351,11 @@ def fake_github(mocker):
 
 
 def md_badge(count, repo=REPO):
-    return generate_markdown_badge(repo, count, "Used by", "informational", "slickpic")
+    return generate_markdown_badge(repo, count, "Used by", "informational", "github")
 
 
 def rst_badge(count, repo=REPO):
-    return generate_rst_badge(repo, count, "Used by", "informational", "slickpic")
+    return generate_rst_badge(repo, count, "Used by", "informational", "github")
 
 
 def run_main(mocker, *args):
@@ -371,7 +372,7 @@ def test_get_parser_defaults():
     assert args.file_path == "README.md"
     assert args.badge_label == "Used by"
     assert args.badge_color == "informational"
-    assert args.badge_logo == "slickpic"
+    assert args.badge_logo == "github"
     assert args.update_badge is False
 
 
@@ -767,3 +768,103 @@ def test_main_updates_badge_on_small_drop(tmp_path, monkeypatch, mocker, fake_gi
     run_main(mocker, "--update-badge", "true")
 
     assert readme.read_text() == f"# Demo\n{md_badge(8)}{COMMENT_MARKER}\n"
+
+
+# --number-format
+
+
+@pytest.mark.parametrize(
+    "count, shown",
+    [
+        (0, "0"),
+        (999, "999"),
+        (1000, "1k"),
+        (1234, "1.2k"),
+        (1999, "1.9k"),  # rounded down, never more than the real count
+        (2300, "2.3k"),
+        (12345, "12k"),
+        (999999, "999k"),
+        (1000000, "1M"),
+        (4321000, "4.3M"),
+        (18844700, "18M"),
+        (1234567890, "1.2B"),
+    ],
+)
+def test_format_count_short(count, shown):
+    assert format_count(count) == shown
+
+
+def test_format_count_full():
+    assert format_count(4321000, "full") == "4321000"
+
+
+@pytest.mark.parametrize(
+    "shown, count",
+    [("1k", 1000), ("1.2k", 1200), ("4.3M", 4300000), ("1.2B", 1200000000)],
+)
+def test_get_badge_count_reads_short_counts(shown, count):
+    badge = generate_markdown_badge(REPO, shown, "Used by", "informational", "github")
+    assert get_badge_count(badge) == count
+
+
+def test_get_parser_number_format():
+    assert get_parser().parse_args(["--repo", REPO]).number_format == "short"
+    args = get_parser().parse_args(["--repo", REPO, "--number-format=full"])
+    assert args.number_format == "full"
+    with pytest.raises(SystemExit):
+        get_parser().parse_args(["--repo", REPO, "--number-format=long"])
+
+
+def test_main_writes_short_count_with_github_logo(
+    tmp_path, monkeypatch, mocker, fake_github
+):
+    monkeypatch.chdir(tmp_path)
+    readme = tmp_path / "README.md"
+    readme.write_text("# Demo\n")
+    fake_github.pages[DEPENDENTS_URL] = make_dependents_page("4,321,000")
+
+    run_main(mocker)
+
+    assert readme.read_text() == f"# Demo\n\n{md_badge('4.3M')} {COMMENT_MARKER}"
+    assert "message=4.3M&color=informational&logo=github" in readme.read_text()
+
+
+def test_main_full_number_format(tmp_path, monkeypatch, mocker, fake_github):
+    monkeypatch.chdir(tmp_path)
+    readme = tmp_path / "README.md"
+    readme.write_text("# Demo\n")
+    fake_github.pages[DEPENDENTS_URL] = make_dependents_page("4,321,000")
+
+    run_main(mocker, "--number-format", "full")
+
+    assert readme.read_text() == f"# Demo\n\n{md_badge(4321000)} {COMMENT_MARKER}"
+
+
+def test_main_small_change_keeps_short_badge(
+    tmp_path, monkeypatch, mocker, fake_github
+):
+    # 1,234 -> 1,250 is still "1.2k", so the file is not rewritten (no new PR).
+    monkeypatch.chdir(tmp_path)
+    readme = tmp_path / "README.md"
+    readme.write_text(f"# Demo\n{md_badge('1.2k')}{COMMENT_MARKER}\n")
+    fake_github.pages[DEPENDENTS_URL] = make_dependents_page("1,250")
+    write = mocker.patch("used_by.main.update_existing_badge")
+
+    run_main(mocker, "--update-badge", "true")
+
+    write.assert_not_called()
+
+
+def test_main_drop_guard_reads_short_badge(
+    tmp_path, monkeypatch, mocker, fake_github, capsys
+):
+    monkeypatch.chdir(tmp_path)
+    readme = tmp_path / "README.md"
+    original = f"# Demo\n{md_badge('1.2k')}{COMMENT_MARKER}\n"
+    readme.write_text(original)
+    fake_github.pages[DEPENDENTS_URL] = make_dependents_page(100)
+
+    run_main(mocker, "--update-badge", "true")
+
+    assert readme.read_text() == original
+    assert "dropped from 1200 to 100" in capsys.readouterr().out
